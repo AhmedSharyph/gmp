@@ -1,452 +1,281 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Health Data Submission</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Child Nutrition & Growth Monitoring Assessment Tool</title>
+<script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+<body class="bg-gray-100 p-6">
 
-  <div class="container mx-auto p-6 md:p-8 bg-white shadow-xl rounded-xl max-w-lg w-full">
-    <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Health Data Submission Form</h2>
-    
-    <form id="dataForm" class="space-y-5">
-                  <!-- Section A: Facility Information -->
-            <section>
-                <h2 class="text-xl sm:text-2xl font-semibold text-sky-700 border-b-2 border-slate-200 pb-3 mb-6 flex items-center gap-2">
-                    <span role="img" aria-label="pin emoji">📍</span> A. Facility Information
-                </h2>
-                <div class="space-y-6">
-<div>
-    <label for="healthFacility" class="block text-sm font-semibold text-slate-700 mb-2">Health Facility</label>
-    <select id="healthFacility" name="healthFacility" required 
-            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-300">
-        <option value="">Loading...</option>
-    </select>
-</div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div class="form-group">
-                            <label for="staffName" class="block text-sm font-semibold mb-2">Staff Name</label>
-                            <input type="text" id="staffName" name="staffName" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors">
-                        </div>
-                        <div class="form-group">
-                            <label for="staffTitle" class="block text-sm font-semibold mb-2">Title</label>
-                            <input type="text" id="staffTitle" name="staffTitle" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors">
-                        </div>
-                        <div class="form-group">
-                            <label for="staffContact" class="block text-sm font-semibold mb-2">Contact</label>
-                            <input type="text" id="staffContact" name="staffContact" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="block text-sm font-semibold mb-2">Training in IYCF or GMP:</label>
-                        <div class="flex flex-wrap gap-4">
-                            <label class="inline-flex items-center text-sm"><input type="radio" name="gmpTraining" value="Yes" required class="form-radio text-amber-500 mr-2 rounded-full border-slate-300"> Yes</label>
-                            <label class="inline-flex items-center text-sm"><input type="radio" name="gmpTraining" value="No" required class="form-radio text-amber-500 mr-2 rounded-full border-slate-300"> No</label>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div class="form-group">
-                            <label for="childrenUnder5" class="block text-sm font-semibold mb-2">How many children under five?</label>
-                            <input type="number" id="childrenUnder5" name="childrenUnder5" min="0" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors">
-                        </div>
-                        <div class="form-group">
-                            <label for="childrenUnder2" class="block text-sm font-semibold mb-2">How many children under 2?</label>
-                            <input type="number" id="childrenUnder2" name="childrenUnder2" min="0" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="childrenUnder2RegularGMP" class="block text-sm font-semibold mb-2">How many children under 2 years attending regular GMP?</label>
-                        <input type="number" id="childrenUnder2RegularGMP" name="childrenUnder2RegularGMP" min="0" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors">
-                    </div>
-                </div>
-            </section>
+<div class="max-w-5xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+  <h1 class="text-2xl font-bold mb-4">🧒 Child Nutrition & Growth Monitoring Assessment Tool</h1>
 
-            <!-- Section 2: Child Nutrition Prevalence Data -->
-            <section>
-                <h2 class="text-xl sm:text-2xl font-semibold text-sky-700 border-b-2 border-slate-200 pb-3 mb-6 flex items-center gap-2">
-                    <span role="img" aria-label="chart emoji">📊</span> 2. Child Nutrition Prevalence Data
-                </h2>
-                <div class="space-y-6">
-                    <div class="form-group">
-                        <label for="under5AttendingGMP" class="block text-sm font-semibold mb-2">2.1 How many children under 5 attending regular GMP?</label>
-                        <input type="number" id="under5AttendingGMP" name="under5AttendingGMP" min="0" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors">
-                    </div>
-                    <h3 class="text-lg font-semibold text-sky-700 mt-6 mb-4">2.2 Among children under 5 years screened in one month (e.g. July 2025):</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div class="form-group">
-                            <label for="under5Underweight" class="block text-sm font-semibold mb-2">Underweight</label>
-                            <input type="number" id="under5Underweight" name="under5Underweight" min="0" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors">
-                        </div>
-                        <div class="form-group">
-                            <label for="under5Stunted" class="block text-sm font-semibold mb-2">Stunted</label>
-                            <input type="number" id="under5Stunted" name="under5Stunted" min="0" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors">
-                        </div>
-                        <div class="form-group">
-                            <label for="under5Wasted" class="block text-sm font-semibold mb-2">Wasted</label>
-                            <input type="number" id="under5Wasted" name="under5Wasted" min="0" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors">
-                        </div>
-                        <div class="form-group">
-                            <label for="under5Overweight" class="block text-sm font-semibold mb-2">Overweight</label>
-                            <input type="number" id="under5Overweight" name="under5Overweight" min="0" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors">
-                        </div>
-                        <div class="form-group">
-                            <label for="under5Obesity" class="block text-sm font-semibold mb-2">Obesity</label>
-                            <input type="number" id="under5Obesity" name="under5Obesity" min="0" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="under2AttendingGMP" class="block text-sm font-semibold mb-2">2.3. How many children under 2 attending GMP / screened regular?</label>
-                        <input type="number" id="under2AttendingGMP" name="under2AttendingGMP" min="0" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors">
-                    </div>
-                    <h3 class="text-lg font-semibold text-sky-700 mt-6 mb-4">2.4 Among children under 2, (how many children, in the month of July were?):</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div class="form-group">
-                            <label for="under2Underweight" class="block text-sm font-semibold mb-2">Underweight</label>
-                            <input type="number" id="under2Underweight" name="under2Underweight" min="0" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors">
-                        </div>
-                        <div class="form-group">
-                            <label for="under2Stunted" class="block text-sm font-semibold mb-2">Stunted</label>
-                            <input type="number" id="under2Stunted" name="under2Stunted" min="0" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors">
-                        </div>
-                        <div class="form-group">
-                            <label for="under2Wasted" class="block text-sm font-semibold mb-2">Wasted</label>
-                            <input type="number" id="under2Wasted" name="under2Wasted" min="0" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors">
-                        </div>
-                        <div class="form-group">
-                            <label for="under2Overweight" class="block text-sm font-semibold mb-2">Overweight</label>
-                            <input type="number" id="under2Overweight" name="under2Overweight" min="0" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors">
-                        </div>
-                        <div class="form-group">
-                            <label for="under2Obesity" class="block text-sm font-semibold mb-2">Obesity</label>
-                            <input type="number" id="under2Obesity" name="under2Obesity" min="0" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors">
-                        </div>
-                    </div>
-                    <!-- Growth Indicator Table -->
-                    <div class="form-group overflow-x-auto">
-                        <h3 class="text-lg font-semibold text-sky-700 mt-6 mb-4">Growth Indicators & Definitions:</h3>
-                        <table class="w-full rounded-lg overflow-hidden shadow-md">
-                            <thead class="bg-blue-100">
-                                <tr class="text-sm font-bold text-sky-800 uppercase">
-                                    <th class="px-4 py-3 text-left border-b-2 border-slate-200">Condition</th>
-                                    <th class="px-4 py-3 text-left border-b-2 border-slate-200">Growth Indicator</th>
-                                    <th class="px-4 py-3 text-left border-b-2 border-slate-200">Z-Score Cut-Off</th>
-                                    <th class="px-4 py-3 text-left border-b-2 border-slate-200">Definition</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="border-b border-slate-200 hover:bg-slate-50">
-                                    <td class="px-4 py-3">Stunting</td>
-                                    <td class="px-4 py-3">Height-for-age (HAZ)</td>
-                                    <td class="px-4 py-3 latex-math">$<-2$ SD</td>
-                                    <td class="px-4 py-3">Child is too short for age due to chronic malnutrition</td>
-                                </tr>
-                                <tr class="bg-slate-50 border-b border-slate-200 hover:bg-slate-100">
-                                    <td class="px-4 py-3">Wasting</td>
-                                    <td class="px-4 py-3">Weight-for-height (WHZ)</td>
-                                    <td class="px-4 py-3 latex-math">$<-2$ SD</td>
-                                    <td class="px-4 py-3">Child is too thin for height due to acute malnutrition</td>
-                                </tr>
-                                <tr class="border-b border-slate-200 hover:bg-slate-50">
-                                    <td class="px-4 py-3">Underweight</td>
-                                    <td class="px-4 py-3">Weight-for-age (WAZ)</td>
-                                    <td class="px-4 py-3 latex-math">$<-2$ SD</td>
-                                    <td class="px-4 py-3">Child has low weight for age, may reflect both stunting and wasting</td>
-                                </tr>
-                                <tr class="bg-slate-50 border-b border-slate-200 hover:bg-slate-100">
-                                    <td class="px-4 py-3">Overweight</td>
-                                    <td class="px-4 py-3">Weight-for-height (WHZ)</td>
-                                    <td class="px-4 py-3 latex-math">$>+2$ SD and $\le+3$ SD</td>
-                                    <td class="px-4 py-3">Child has excess weight for height, early sign of overnutrition</td>
-                                </tr>
-                                <tr class="hover:bg-slate-50">
-                                    <td class="px-4 py-3">Obesity</td>
-                                    <td class="px-4 py-3">BMI-for-age (BMIZ)</td>
-                                    <td class="px-4 py-3 latex-math">$>+3$ SD</td>
-                                    <td class="px-4 py-3">Child has significantly high body mass for age, indicating obesity</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
+  <form id="dataForm" class="space-y-6">
 
-            <!-- Section 3: Growth Monitoring Practices -->
-            <section>
-                <h2 class="text-xl sm:text-2xl font-semibold text-sky-700 border-b-2 border-slate-200 pb-3 mb-6 flex items-center gap-2">
-                    <span role="img" aria-label="ruler emoji">📏</span> 3. Growth Monitoring Practices
-                </h2>
-                <div class="space-y-6">
-                    <div class="form-group">
-                        <label class="block text-sm font-semibold mb-2">3.1. Is growth monitoring routinely conducted?</label>
-                        <div class="flex flex-wrap gap-4" id="gmpRoutinelyConductedRadio">
-                            <label class="inline-flex items-center text-sm"><input type="radio" name="gmpRoutinelyConducted" value="Yes" required class="form-radio text-amber-500 mr-2 rounded-full border-slate-300"> Yes</label>
-                            <label class="inline-flex items-center text-sm"><input type="radio" name="gmpRoutinelyConducted" value="No" required class="form-radio text-amber-500 mr-2 rounded-full border-slate-300"> No</label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="block text-sm font-semibold mb-2">3.2 Is the developmental tracking done on the book?</label>
-                        <div class="flex flex-wrap gap-4" id="devTrackingOnBookRadio">
-                            <label class="inline-flex items-center text-sm"><input type="radio" name="devTrackingOnBook" value="Yes" required class="form-radio text-amber-500 mr-2 rounded-full border-slate-300"> Yes</label>
-                            <label class="inline-flex items-center text-sm"><input type="radio" name="devTrackingOnBook" value="No" required class="form-radio text-amber-500 mr-2 rounded-full border-slate-300"> No</label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="block text-sm font-semibold mb-2">3.2. Does the facility enter the Child development tracking to the DHISI-II module?</label>
-                        <div class="flex flex-wrap gap-4" id="devTrackingDHISIRadio">
-                            <label class="inline-flex items-center text-sm"><input type="radio" name="devTrackingDHISI" value="Yes" required class="form-radio text-amber-500 mr-2 rounded-full border-slate-300"> Yes</label>
-                            <label class="inline-flex items-center text-sm"><input type="radio" name="devTrackingDHISI" value="No" required class="form-radio text-amber-500 mr-2 rounded-full border-slate-300"> No</label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="block text-sm font-semibold mb-2">3.3. Is nutrition counseling or IYCF provided during visits?</label>
-                        <div class="flex flex-wrap gap-4" id="iycfCounselingRadio">
-                            <label class="inline-flex items-center text-sm"><input type="radio" name="iycfCounseling" value="Yes" required class="form-radio text-amber-500 mr-2 rounded-full border-slate-300"> Yes</label>
-                            <label class="inline-flex items-center text-sm"><input type="radio" name="iycfCounseling" value="No" required class="form-radio text-amber-500 mr-2 rounded-full border-slate-300"> No</label>
-                        </div>
-                    </div>
-                    <div id="iycfTopicsSection" class="hidden-section space-y-4">
-                        <label class="block text-sm font-semibold text-sky-700 mt-6 mb-4">3.4. If yes, what are the topics:</label>
-                        <div class="flex flex-wrap gap-4">
-                            <label class="inline-flex items-center text-sm"><input type="checkbox" name="iycfTopics" value="Exclusive Breast feeding" class="form-checkbox text-amber-500 mr-2 rounded border-slate-300"> Exclusive Breast feeding</label>
-                            <label class="inline-flex items-center text-sm"><input type="checkbox" name="iycfTopics" value="Complimentary feeding" class="form-checkbox text-amber-500 mr-2 rounded border-slate-300"> Complimentary feeding</label>
-                            <label class="inline-flex items-center text-sm"><input type="checkbox" name="iycfTopics" value="Responsive Feeding" class="form-checkbox text-amber-500 mr-2 rounded border-slate-300"> Responsive Feeding</label>
-                            <label class="inline-flex items-center text-sm"><input type="checkbox" name="iycfTopics" value="Feeding during illness" class="form-checkbox text-amber-500 mr-2 rounded border-slate-300"> Feeding during illness</label>
-                            <label class="inline-flex items-center text-sm"><input type="checkbox" name="iycfTopics" value="Fussy eating/ not eating" class="form-checkbox text-amber-500 mr-2 rounded border-slate-300"> Fussy eating/ not eating</label>
-                            <label class="inline-flex items-center text-sm"><input type="checkbox" name="iycfTopics" value="Feeding when growth is faltering" class="form-checkbox text-amber-500 mr-2 rounded border-slate-300"> Feeding when growth is faltering</label>
-                            <label class="inline-flex items-center text-sm"><input type="checkbox" name="iycfTopics" value="Feeding practices for children who are overweight" class="form-checkbox text-amber-500 mr-2 rounded border-slate-300"> Feeding practices for children who are overweight</label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="block text-sm font-semibold mb-2">3.5. Any child identified with delays this year?</label>
-                        <div class="flex flex-wrap gap-4" id="delayIdentifiedRadio">
-                            <label class="inline-flex items-center text-sm"><input type="radio" name="childDelays" value="Yes" required class="form-radio text-amber-500 mr-2 rounded-full border-slate-300"> Yes</label>
-                            <label class="inline-flex items-center text-sm"><input type="radio" name="childDelays" value="No" required class="form-radio text-amber-500 mr-2 rounded-full border-slate-300"> No</label>
-                        </div>
-                    </div>
-                    <div id="delayResponseSection" class="hidden-section">
-                        <label for="delayResponse" class="block text-sm font-semibold mb-2">3.5.1. If so, what do you, health worker say or tell the parent?</label>
-                        <textarea id="delayResponse" name="delayResponse" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="block text-sm font-semibold mb-2">3.6. Are growth charts properly filled and interpreted?</label>
-                        <div class="flex flex-wrap gap-4" id="growthChartsProperlyFilledRadio">
-                            <label class="inline-flex items-center text-sm"><input type="radio" name="growthChartsProperlyFilled" value="Yes" required class="form-radio text-amber-500 mr-2 rounded-full border-slate-300"> Yes</label>
-                            <label class="inline-flex items-center text-sm"><input type="radio" name="growthChartsProperlyFilled" value="No" required class="form-radio text-amber-500 mr-2 rounded-full border-slate-300"> No</label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="block text-sm font-semibold mb-2">3.7. Was any group sessions held to parents this year?</label>
-                        <div class="flex flex-wrap gap-4" id="groupSessionsRadio">
-                            <label class="inline-flex items-center text-sm"><input type="radio" name="groupSessionsHeld" value="Yes" required class="form-radio text-amber-500 mr-2 rounded-full border-slate-300"> Yes</label>
-                            <label class="inline-flex items-center text-sm"><input type="radio" name="groupSessionsHeld" value="No" required class="form-radio text-amber-500 mr-2 rounded-full border-slate-300"> No</label>
-                        </div>
-                    </div>
-                    <div id="groupSessionsCountSection" class="hidden-section">
-                        <label for="groupSessionsCount" class="block text-sm font-semibold mb-2">3.7.1. How many sessions?</label>
-                        <input type="number" id="groupSessionsCount" name="groupSessionsCount" min="0" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors">
-                    </div>
-                </div>
-            </section>
+    <!-- A. Facility Information -->
+    <section class="border-b pb-4">
+      <h2 class="text-xl font-semibold mb-2">📍 Facility Information</h2>
 
-            <!-- Section 4: Other Public Health Programs -->
-            <section>
-                <h2 class="text-xl sm:text-2xl font-semibold text-sky-700 border-b-2 border-slate-200 pb-3 mb-6 flex items-center gap-2">
-                    <span role="img" aria-label="tools emoji">🛠️</span> 4. Other – All public health programs and events
-                </h2>
-                <div class="space-y-6">
-                    <div class="form-group">
-                        <label class="block text-sm font-semibold mb-2">4.1 What are key issues affecting adolescents and young people’s health in the island? (select more than one if applicable)</label>
-                        <div class="flex flex-wrap gap-4">
-                            <label class="inline-flex items-center text-sm"><input type="checkbox" name="adolescentIssues" value="Unhealthy diet" class="form-checkbox text-amber-500 mr-2 rounded border-slate-300"> Unhealthy diet</label>
-                            <label class="inline-flex items-center text-sm"><input type="checkbox" name="adolescentIssues" value="Skipping meals" class="form-checkbox text-amber-500 mr-2 rounded border-slate-300"> Skipping meals</label>
-                            <label class="inline-flex items-center text-sm"><input type="checkbox" name="adolescentIssues" value="Eating soft drinks & energy drinks" class="form-checkbox text-amber-500 mr-2 rounded border-slate-300"> Eating soft drinks & energy drinks</label>
-                            <label class="inline-flex items-center text-sm"><input type="checkbox" name="adolescentIssues" value="Mental health problems (not illness)" class="form-checkbox text-amber-500 mr-2 rounded border-slate-300"> Mental health problems (not illness)</label>
-                            <label class="inline-flex items-center text-sm"><input type="checkbox" name="adolescentIssues" value="Mental health illness" class="form-checkbox text-amber-500 mr-2 rounded border-slate-300"> Mental health illness</label>
-                            <label class="inline-flex items-center text-sm"><input type="checkbox" name="adolescentIssues" value="Diabetes" class="form-checkbox text-amber-500 mr-2 rounded border-slate-300"> Diabetes</label>
-                            <label class="inline-flex items-center text-sm"><input type="checkbox" name="adolescentIssues" value="Cancer" class="form-checkbox text-amber-500 mr-2 rounded border-slate-300"> Cancer</label>
-                            <label class="inline-flex items-center text-sm"><input type="checkbox" name="adolescentIssues" value="Other NCDs" class="form-checkbox text-amber-500 mr-2 rounded border-slate-300"> Other NCDs</label>
-                            <label class="inline-flex items-center text-sm"><input type="checkbox" name="adolescentIssues" value="Not active" class="form-checkbox text-amber-500 mr-2 rounded border-slate-300"> Not active</label>
-                            <label class="inline-flex items-center text-sm"><input type="checkbox" name="adolescentIssues" value="Smoking & vaping" class="form-checkbox text-amber-500 mr-2 rounded border-slate-300"> Smoking & vaping</label>
-                            <label class="inline-flex items-center text-sm"><input type="checkbox" name="adolescentIssues" value="Drugs" class="form-checkbox text-amber-500 mr-2 rounded border-slate-300"> Drugs</label>
-                            <label class="inline-flex items-center text-sm"><input type="checkbox" name="adolescentIssues" value="Unwanted pregnancies" class="form-checkbox text-amber-500 mr-2 rounded border-slate-300"> Unwanted pregnancies</label>
-                            <label class="inline-flex items-center text-sm"><input type="checkbox" name="adolescentIssues" value="Disabilities" class="form-checkbox text-amber-500 mr-2 rounded border-slate-300"> Disabilities</label>
-                            <label class="inline-flex items-center text-sm"><input type="checkbox" name="adolescentIssues" value="High Screen time" class="form-checkbox text-amber-500 mr-2 rounded border-slate-300"> High Screen time</label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="preventionActivities" class="block text-sm font-semibold mb-2">4.2 What prevention activities do you conduct?</label>
-                        <textarea id="preventionActivities" name="preventionActivities" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="block text-sm font-semibold mb-2">4.3 Do you conduct health promotion, Community engagement or outreach activities?</label>
-                        <div class="flex flex-wrap gap-4" id="outreachActivitiesRadio">
-                            <label class="inline-flex items-center text-sm"><input type="radio" name="outreachActivities" value="Yes" required class="form-radio text-amber-500 mr-2 rounded-full border-slate-300"> Yes</label>
-                            <label class="inline-flex items-center text-sm"><input type="radio" name="outreachActivities" value="No" required class="form-radio text-amber-500 mr-2 rounded-full border-slate-300"> No</label>
-                        </div>
-                    </div>
-                    <div id="outreachCountSection" class="hidden-section">
-                        <label for="outreachCount" class="block text-sm font-semibold mb-2">4.4 How many was conducted this year?</label>
-                        <input type="number" id="outreachCount" name="outreachCount" min="0" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors">
-                    </div>
-                </div>
-            </section>
+      <!-- Health Facility Dropdown -->
+      <div>
+        <label for="healthFacility" class="block font-medium mb-1">1. Name of health facility:</label>
+        <select id="healthFacility" name="healthFacility" required class="w-full border rounded p-2"></select>
+      </div>
 
-      
-      
-      <button type="submit" id="submitBtn" 
-              class="w-full py-3 mt-4 text-white font-bold bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed">
+      <!-- Who conducts GMP -->
+      <div>
+        <p class="font-medium mt-4">2. Who conducts GMP?</p>
+        <label class="block mt-2">a. Staff Name</label>
+        <input type="text" name="staffName" class="w-full border rounded p-2" required>
+
+        <label class="block mt-2">b. Title</label>
+        <input type="text" name="staffTitle" class="w-full border rounded p-2" required>
+
+        <label class="block mt-2">c. Contact</label>
+        <input type="text" name="staffContact" class="w-full border rounded p-2" required>
+
+        <label class="block mt-2">d. Training in IYCF or GMP:</label>
+        <select name="training" class="w-full border rounded p-2" required>
+          <option value="" disabled selected>Select</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+      </div>
+
+      <!-- Children Counts -->
+      <div class="mt-4">
+        <label class="block mt-2">3. How many children under five?</label>
+        <input type="number" name="childrenUnder5" class="w-full border rounded p-2" required>
+
+        <label class="block mt-2">4. How many children under 2?</label>
+        <input type="number" name="childrenUnder2" class="w-full border rounded p-2" required>
+
+        <label class="block mt-2">5. How many children under 2 years attending regular GMP?</label>
+        <input type="number" name="childrenUnder2GMP" class="w-full border rounded p-2" required>
+      </div>
+    </section>
+
+    <!-- 2. Child Nutrition Prevalence Data -->
+    <section class="border-b pb-4">
+      <h2 class="text-xl font-semibold mb-2">📊 Child Nutrition Prevalence Data</h2>
+
+      <label class="block mt-2">2.1 How many children under 5 attending regular GMP?</label>
+      <input type="number" name="under5GMP" class="w-full border rounded p-2" required>
+
+      <p class="font-medium mt-4">2.2 Among children under 5 screened in one month:</p>
+      <div class="grid grid-cols-2 gap-4 mt-2">
+        <label>Underweight<input type="number" name="underweight5" class="border rounded p-2 w-full"></label>
+        <label>Stunted<input type="number" name="stunted5" class="border rounded p-2 w-full"></label>
+        <label>Wasted<input type="number" name="wasted5" class="border rounded p-2 w-full"></label>
+        <label>Overweight<input type="number" name="overweight5" class="border rounded p-2 w-full"></label>
+        <label>Obesity<input type="number" name="obesity5" class="border rounded p-2 w-full"></label>
+      </div>
+
+      <label class="block mt-2">2.3 How many children under 2 attending GMP/screened regularly?</label>
+      <input type="number" name="under2Screened" class="w-full border rounded p-2" required>
+
+      <p class="font-medium mt-4">Among children under 2, how many were:</p>
+      <div class="grid grid-cols-2 gap-4 mt-2">
+        <label>Underweight<input type="number" name="underweight2" class="border rounded p-2 w-full"></label>
+        <label>Stunted<input type="number" name="stunted2" class="border rounded p-2 w-full"></label>
+        <label>Wasted<input type="number" name="wasted2" class="border rounded p-2 w-full"></label>
+        <label>Overweight<input type="number" name="overweight2" class="border rounded p-2 w-full"></label>
+        <label>Obesity<input type="number" name="obesity2" class="border rounded p-2 w-full"></label>
+      </div>
+    </section>
+
+    <!-- 3. Growth Monitoring Practices -->
+    <section class="border-b pb-4">
+      <h2 class="text-xl font-semibold mb-2">📏 Growth Monitoring Practices</h2>
+
+      <label>3.1 Is growth monitoring routinely conducted?</label>
+      <select name="growthMonitoring" class="w-full border rounded p-2" required onchange="toggleSection('nutritionTopics', this.value)">
+        <option value="" disabled selected>Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+
+      <label>3.2 Is the developmental tracking done on the book?</label>
+      <select name="trackingBook" class="w-full border rounded p-2" required>
+        <option value="" disabled selected>Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+
+      <label>3.3 Does the facility enter Child development tracking to DHIS-II module?</label>
+      <select name="trackingDHIS" class="w-full border rounded p-2" required>
+        <option value="" disabled selected>Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+
+      <label>3.4 Is nutrition counseling or IYCF provided during visits?</label>
+      <select name="nutritionCounseling" class="w-full border rounded p-2" required onchange="toggleSection('nutritionTopics', this.value)">
+        <option value="" disabled selected>Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+
+      <!-- Nutrition Topics -->
+      <div id="nutritionTopics" class="hidden mt-2 space-y-2 border p-2 rounded">
+        <p>3.4 If yes, what are the topics:</p>
+        <label><input type="checkbox" name="topics" value="Exclusive Breastfeeding"> Exclusive Breastfeeding</label>
+        <label><input type="checkbox" name="topics" value="Complimentary Feeding"> Complimentary Feeding</label>
+        <label><input type="checkbox" name="topics" value="Responsive Feeding"> Responsive Feeding</label>
+        <label><input type="checkbox" name="topics" value="Feeding during illness"> Feeding during illness</label>
+        <label><input type="checkbox" name="topics" value="Fussy eating/not eating"> Fussy eating/not eating</label>
+        <label><input type="checkbox" name="topics" value="Feeding when growth is faltering"> Feeding when growth is faltering</label>
+        <label><input type="checkbox" name="topics" value="Feeding practices for children who are overweight"> Feeding practices for children who are overweight</label>
+      </div>
+
+      <label>3.5 Any child identified with delays this year?</label>
+      <select name="childDelays" class="w-full border rounded p-2" required onchange="toggleSection('delaysAdvice', this.value)">
+        <option value="" disabled selected>Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+
+      <div id="delaysAdvice" class="hidden mt-2">
+        <label>If so, what do you, health worker say or tell the parent?</label>
+        <textarea name="delaysAdviceText" class="w-full border rounded p-2"></textarea>
+      </div>
+
+      <label>3.6 Are growth charts properly filled and interpreted?</label>
+      <select name="growthCharts" class="w-full border rounded p-2" required>
+        <option value="" disabled selected>Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+
+      <label>3.7 Was any group session held for parents this year?</label>
+      <select name="groupSession" class="w-full border rounded p-2" required onchange="toggleSection('sessionCount', this.value)">
+        <option value="" disabled selected>Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+
+      <div id="sessionCount" class="hidden mt-2">
+        <label>How many sessions?</label>
+        <input type="number" name="sessionCountNumber" class="w-full border rounded p-2">
+      </div>
+
+    </section>
+
+    <!-- 4. Other public health programs and events -->
+    <section class="border-b pb-4">
+      <h2 class="text-xl font-semibold mb-2">🛠️ Other – Public Health Programs and Events</h2>
+
+      <label>4.1 Key issues affecting adolescents and young people’s health:</label>
+      <div class="grid grid-cols-2 gap-2 mt-1">
+        <label><input type="checkbox" name="issues" value="Unhealthy diet"> Unhealthy diet</label>
+        <label><input type="checkbox" name="issues" value="Skipping meals"> Skipping meals</label>
+        <label><input type="checkbox" name="issues" value="Soft drinks & energy drinks"> Soft drinks & energy drinks</label>
+        <label><input type="checkbox" name="issues" value="Mental health problems"> Mental health problems</label>
+        <label><input type="checkbox" name="issues" value="Mental health illness"> Mental health illness</label>
+        <label><input type="checkbox" name="issues" value="Diabetes"> Diabetes</label>
+        <label><input type="checkbox" name="issues" value="Cancer"> Cancer</label>
+        <label><input type="checkbox" name="issues" value="Other NCDs"> Other NCDs</label>
+        <label><input type="checkbox" name="issues" value="Not active"> Not active</label>
+        <label><input type="checkbox" name="issues" value="Smoking & vaping"> Smoking & vaping</label>
+        <label><input type="checkbox" name="issues" value="Drugs"> Drugs</label>
+        <label><input type="checkbox" name="issues" value="Unwanted pregnancies"> Unwanted pregnancies</label>
+        <label><input type="checkbox" name="issues" value="Disabilities"> Disabilities</label>
+        <label><input type="checkbox" name="issues" value="High Screen time"> High Screen time</label>
+      </div>
+
+      <label class="block mt-2">4.2 What prevention activities do you conduct?</label>
+      <textarea name="preventionActivities" class="w-full border rounded p-2"></textarea>
+
+      <label class="block mt-2">4.3 Do you conduct health promotion, community engagement or outreach activities?</label>
+      <select name="healthPromotion" class="w-full border rounded p-2" required>
+        <option value="" disabled selected>Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+
+      <label class="block mt-2">4.4 How many were conducted this year?</label>
+      <input type="number" name="activitiesCount" class="w-full border rounded p-2">
+    </section>
+
+    <!-- Submit Button -->
+    <div class="text-center mt-4">
+      <button id="submitBtn" type="submit" class="bg-blue-600 text-white font-bold px-6 py-2 rounded hover:bg-blue-700">
         Submit Data
       </button>
-    </form>
-    
-    <div id="message" class="mt-6 p-4 text-center rounded-lg font-medium hidden"></div>
-  </div>
-<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+    </div>
+  </form>
+</div>
+
 <script>
-    let healthFacilityChoices;
-    const loadingOverlay = document.getElementById('loadingOverlay');
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyUlbwuQHD5tkCef0ModjzMjNmEJQYJFqlNXVNu9q-kzYE09Iad8qcfbVq57R-pYmHH/exec';
+let healthFacilityChoices;
 
-    const loadHealthFacilities = async () => {
-        loadingOverlay.style.display = 'flex';
-        const facilitySelect = document.getElementById('healthFacility');
+// Load health facility dropdown options
+async function fetchOptions() {
+  const select = document.getElementById('healthFacility');
+  try {
+    const response = await fetch(`${WEB_APP_URL}?method=getOptions`);
+    const options = await response.json();
+    select.innerHTML = '';
+    
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = 'Select a facility...';
+    defaultOption.disabled = true;
+    defaultOption.selected = true;
+    select.appendChild(defaultOption);
 
-        try {
-            const response = await fetch(`${webappUrl}/facilities`);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            const facilities = await response.json();
-
-            facilitySelect.innerHTML = '';
-
-            const defaultOption = document.createElement('option');
-            defaultOption.value = '';
-            defaultOption.textContent = 'Select a facility...';
-            defaultOption.disabled = true;
-            defaultOption.selected = true;
-            facilitySelect.appendChild(defaultOption);
-
-            facilities.forEach(facility => {
-                const option = document.createElement('option');
-                option.value = facility.name;
-                option.textContent = facility.name;
-                facilitySelect.appendChild(option);
-            });
-
-            if (healthFacilityChoices) healthFacilityChoices.destroy();
-            healthFacilityChoices = new Choices(facilitySelect, {
-                searchEnabled: true,
-                shouldSort: false,
-                placeholder: true,
-                placeholderValue: 'Select a facility...',
-                itemSelectText: '',
-            });
-
-        } catch (error) {
-            console.error("Error fetching health facilities:", error);
-            facilitySelect.innerHTML = '<option>Error loading facilities</option>';
-        } finally {
-            loadingOverlay.style.display = 'none';
-        }
-    };
-
-    window.onload = () => {
-        loadHealthFacilities();
-        // other initialization code if you have
-    };
-</script>
-
-  <script>
-    // ⚠️ **IMPORTANT: REPLACE THIS URL WITH YOUR DEPLOYED WEB APP URL** ⚠️
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyUlbwuQHD5tkCef0ModjzMjNmEJQYJFqlNXVNu9q-kzYE09Iad8qcfbVq57R-pYmHH/exec'; 
-
-    document.addEventListener('DOMContentLoaded', function() {
-      const form = document.getElementById('dataForm');
-      const healthFacilitySelect = document.getElementById('healthFacility');
-      const messageDiv = document.getElementById('message');
-      const submitBtn = document.getElementById('submitBtn');
-
-      function showMessage(msg, type) {
-        messageDiv.textContent = msg;
-        messageDiv.classList.remove('hidden');
-        messageDiv.className = 'mt-6 p-4 text-center rounded-lg font-medium';
-        if (type === 'success') {
-          messageDiv.classList.add('bg-green-100', 'text-green-800');
-        } else if (type === 'error') {
-          messageDiv.classList.add('bg-red-100', 'text-red-800');
-        } else if (type === 'info') {
-          messageDiv.classList.add('bg-blue-100', 'text-blue-800');
-        }
-      }
-
-      function toggleFormState(disabled) {
-        const formElements = form.elements;
-        for (let i = 0; i < formElements.length; i++) {
-          formElements[i].disabled = disabled;
-        }
-        submitBtn.textContent = disabled ? "Submitting..." : "Submit Data";
-      }
-
-      // Fetch dropdown options on page load using the Fetch API
-      async function fetchOptions() {
-        try {
-          const response = await fetch(`${WEB_APP_URL}?method=getOptions`);
-          const options = await response.json();
-          healthFacilitySelect.innerHTML = '';
-          if (options.length > 0) {
-            options.forEach(option => {
-              const opt = document.createElement('option');
-              opt.value = option;
-              opt.textContent = option;
-              healthFacilitySelect.appendChild(opt);
-            });
-          } else {
-            const opt = document.createElement('option');
-            opt.value = "";
-            opt.textContent = "No facilities found.";
-            healthFacilitySelect.appendChild(opt);
-            healthFacilitySelect.disabled = true;
-          }
-        } catch (error) {
-          showMessage('Error loading facilities: ' + error.message, 'error');
-          healthFacilitySelect.innerHTML = '<option value="">Error</option>';
-          healthFacilitySelect.disabled = true;
-        }
-      }
-
-      // Handle form submission using the Fetch API
-      form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const formData = new FormData(form);
-        const urlSearchParams = new URLSearchParams(formData);
-
-        toggleFormState(true);
-        showMessage('Submitting...', 'info');
-
-        try {
-          const response = await fetch(WEB_APP_URL, {
-            method: 'POST',
-            body: urlSearchParams
-          });
-          const result = await response.json();
-          if (result.status === 'success') {
-            showMessage('Form submitted successfully! 🎉', 'success');
-            form.reset();
-          } else {
-            showMessage('Error submitting form: ' + result.message, 'error');
-          }
-        } catch (error) {
-          showMessage('Submission failed: ' + error.message, 'error');
-        } finally {
-          toggleFormState(false);
-        }
-      });
-
-      fetchOptions();
+    options.forEach(option => {
+      const opt = document.createElement('option');
+      opt.value = option;
+      opt.textContent = option;
+      select.appendChild(opt);
     });
-  </script>
 
+    if (healthFacilityChoices) healthFacilityChoices.destroy();
+    healthFacilityChoices = new Choices(select, { searchEnabled: true, shouldSort: false, itemSelectText: '' });
+
+  } catch (err) {
+    select.innerHTML = '<option value="">Error loading facilities</option>';
+    console.error(err);
+  }
+}
+
+// Toggle sections based on selection
+function toggleSection(sectionId, value) {
+  const section = document.getElementById(sectionId);
+  section.classList.toggle('hidden', value !== 'Yes');
+}
+
+// Form submission
+document.getElementById('dataForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const formData = new FormData(this);
+  const params = new URLSearchParams(formData);
+
+  const submitBtn = document.getElementById('submitBtn');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Submitting...';
+
+  try {
+    const res = await fetch(WEB_APP_URL, { method: 'POST', body: params });
+    const result = await res.json();
+    alert(result.status === 'success' ? 'Form submitted successfully!' : 'Submission failed: ' + result.message);
+    this.reset();
+    healthFacilityChoices.clearStore();
+  } catch (err) {
+    alert('Submission failed: ' + err.message);
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Submit Data';
+  }
+});
+
+// Initialize
+window.onload = fetchOptions;
+</script>
 </body>
 </html>
