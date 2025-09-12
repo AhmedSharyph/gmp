@@ -144,5 +144,70 @@
     });
   </script>
 
+
+// ===== Google Apps Script (Code.gs) =====
+
+const SHEET_ID = '1vGsJoi6pb9T9Zz_4IgFmrY0oSJ_HwJx3Kek9wNE6UQc';
+const OPTIONS_SHEET_NAME = 'hcf_list';   // Sheet with dropdown options
+const SUBMISSIONS_SHEET_NAME = 'gmp_data'; // Sheet to store submissions
+const HEADER_CELL = 'A1'; // Optional: header from hcf_list A1
+
+// Main entry point
+function doGet(e) {
+  const method = e.parameter.method;
+
+  if (method === 'getOptions') return getOptions();
+  if (method === 'getHeader') return getHeader();
+  if (e.parameter.selectedValue) return saveSubmission(e.parameter.selectedValue);
+
+  return ContentService.createTextOutput('No method specified');
+}
+
+// Fetch header/title
+function getHeader() {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  let sheet = ss.getSheetByName(OPTIONS_SHEET_NAME);
+  let title = 'GMP Form';
+  if (sheet) {
+    const val = sheet.getRange(HEADER_CELL).getValue();
+    if (val) title = val;
+  }
+  return ContentService
+    .createTextOutput(JSON.stringify({ title }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// Fetch dropdown options from hcf_list
+function getOptions() {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  const sheet = ss.getSheetByName(OPTIONS_SHEET_NAME);
+  if (!sheet) return ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
+
+  const values = sheet.getRange('A:A').getValues();
+  const options = values.flat().filter(v => v).map(v => v.toString());
+
+  return ContentService
+    .createTextOutput(JSON.stringify(options))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// Save submitted value to gmp_data
+function saveSubmission(selectedValue) {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  let sheet = ss.getSheetByName(SUBMISSIONS_SHEET_NAME);
+
+  if (!sheet) {
+    sheet = ss.insertSheet(SUBMISSIONS_SHEET_NAME);
+    sheet.appendRow(['Timestamp', 'Selected Value']);
+  }
+
+  sheet.appendRow([new Date(), selectedValue]);
+
+  return ContentService
+    .createTextOutput(JSON.stringify({ success: true, message: 'Submission saved!' }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+
 </body>
 </html>
