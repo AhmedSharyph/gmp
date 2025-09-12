@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dynamic Form</title>
+  <title>Dynamic GMP Form</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -46,40 +46,31 @@
 </head>
 <body>
 
-  <!-- Dynamic header will be loaded here -->
   <h1 id="dynamic-header">Loading survey title...</h1>
 
   <select id="dropdown" name="selectedValue" required>
     <option value="">-- Loading options... --</option>
   </select>
 
-  <button type="submit" onclick="submitForm()">Submit Selection</button>
+  <button type="button" onclick="submitForm()">Submit Selection</button>
 
   <div id="status"></div>
 
   <script>
-    const GAS_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID_HERE/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec';
 
-    // Load dynamic header from Google Sheet
+    // Load header/title
     async function loadHeader() {
       const headerEl = document.getElementById('dynamic-header');
       headerEl.textContent = 'Fetching survey title...';
-
       try {
-        const res = await fetch(`${GAS_URL}?method=getHeader`, {
-          method: 'GET',
-          mode: 'cors'
-        });
-
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
+        const res = await fetch(`${GAS_URL}?method=getHeader`);
         const data = await res.json();
-        headerEl.textContent = data.title || 'Survey Form';
+        headerEl.textContent = data.title || 'GMP Form';
         headerEl.style.color = '#2c3e50';
-
       } catch (err) {
-        console.error('Failed to load header:', err);
-        headerEl.textContent = 'Survey Form (Error loading title)';
+        console.error(err);
+        headerEl.textContent = 'GMP Form (Error loading title)';
         headerEl.style.color = '#e74c3c';
       }
     }
@@ -91,13 +82,7 @@
       status.className = '';
 
       try {
-        const res = await fetch(`${GAS_URL}?method=getOptions`, {
-          method: 'GET',
-          mode: 'cors'
-        });
-
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
+        const res = await fetch(`${GAS_URL}?method=getOptions`);
         const options = await res.json();
 
         const dropdown = document.getElementById('dropdown');
@@ -112,7 +97,6 @@
 
         status.textContent = '✅ Options loaded!';
         status.className = 'success';
-
       } catch (err) {
         console.error(err);
         status.textContent = `❌ Failed to load options: ${err.message}`;
@@ -120,20 +104,37 @@
       }
     }
 
-    // Submit form by redirecting to Apps Script
-    function submitForm() {
+    // Submit form using fetch
+    async function submitForm() {
       const dropdown = document.getElementById('dropdown');
       const selectedValue = dropdown.value;
+      const status = document.getElementById('status');
 
       if (!selectedValue) {
-        document.getElementById('status').innerHTML = '<p style="color:red;">Please select an option!</p>';
+        status.textContent = 'Please select an option!';
+        status.className = 'error';
         return;
       }
 
-      document.getElementById('status').textContent = 'Submitting...';
+      status.textContent = 'Submitting...';
+      status.className = '';
 
-      // Redirect to Apps Script web app — triggers save + shows success page
-      window.location.href = `${GAS_URL}?selectedValue=${encodeURIComponent(selectedValue)}`;
+      try {
+        const res = await fetch(`${GAS_URL}?selectedValue=${encodeURIComponent(selectedValue)}`);
+        const data = await res.json();
+
+        if (data.success) {
+          status.textContent = '✅ Submission saved!';
+          status.className = 'success';
+          dropdown.value = ''; // reset dropdown
+        } else {
+          throw new Error(data.message || 'Submission failed');
+        }
+      } catch (err) {
+        console.error(err);
+        status.textContent = `❌ ${err.message}`;
+        status.className = 'error';
+      }
     }
 
     // Run on page load
