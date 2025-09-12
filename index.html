@@ -1,16 +1,147 @@
-<form name="submit-to-google-sheet">
-  <input name="email" type="email" placeholder="Email" required>
-  <button type="submit">Send</button>
-</form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dynamic Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 10px;
+    }
+    select, button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #status {
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 4px;
+    }
+    #status.success { background-color: #d4edda; color: #155724; }
+    #status.error { background-color: #f8d7da; color: #721c24; }
+  </style>
+</head>
+<body>
 
-<script>
-  const scriptURL = 'https://script.google.com/macros/s/AKfycbzWMOU9GLHedgYewId13Xd2rizeqYVXbrEgVaOMFjjnLA8MPAwuNeoRzDghEoLlGByt/exec'
-  const form = document.forms['submit-to-google-sheet']
+  <!-- Dynamic header will be loaded here -->
+  <h1 id="dynamic-header">Loading survey title...</h1>
 
-  form.addEventListener('submit', e => {
-    e.preventDefault()
-    fetch(scriptURL, { method: 'POST', body: new FormData(form)})
-      .then(response => console.log('Success!', response))
-      .catch(error => console.error('Error!', error.message))
-  })
-</script>
+  <select id="dropdown" name="selectedValue" required>
+    <option value="">-- Loading options... --</option>
+  </select>
+
+  <button type="submit" onclick="submitForm()">Submit Selection</button>
+
+  <div id="status"></div>
+
+  <script>
+    const GAS_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID_HERE/exec';
+
+    // Load dynamic header from Google Sheet
+    async function loadHeader() {
+      const headerEl = document.getElementById('dynamic-header');
+      headerEl.textContent = 'Fetching survey title...';
+
+      try {
+        const res = await fetch(`${GAS_URL}?method=getHeader`, {
+          method: 'GET',
+          mode: 'cors'
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const data = await res.json();
+        headerEl.textContent = data.title || 'Survey Form';
+        headerEl.style.color = '#2c3e50';
+
+      } catch (err) {
+        console.error('Failed to load header:', err);
+        headerEl.textContent = 'Survey Form (Error loading title)';
+        headerEl.style.color = '#e74c3c';
+      }
+    }
+
+    // Load dropdown options
+    async function loadOptions() {
+      const status = document.getElementById('status');
+      status.textContent = 'Fetching options...';
+      status.className = '';
+
+      try {
+        const res = await fetch(`${GAS_URL}?method=getOptions`, {
+          method: 'GET',
+          mode: 'cors'
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const options = await res.json();
+
+        const dropdown = document.getElementById('dropdown');
+        dropdown.innerHTML = '<option value="">-- Select an option --</option>';
+
+        options.forEach(opt => {
+          const el = document.createElement('option');
+          el.value = opt;
+          el.textContent = opt;
+          dropdown.appendChild(el);
+        });
+
+        status.textContent = '✅ Options loaded!';
+        status.className = 'success';
+
+      } catch (err) {
+        console.error(err);
+        status.textContent = `❌ Failed to load options: ${err.message}`;
+        status.className = 'error';
+      }
+    }
+
+    // Submit form by redirecting to Apps Script
+    function submitForm() {
+      const dropdown = document.getElementById('dropdown');
+      const selectedValue = dropdown.value;
+
+      if (!selectedValue) {
+        document.getElementById('status').innerHTML = '<p style="color:red;">Please select an option!</p>';
+        return;
+      }
+
+      document.getElementById('status').textContent = 'Submitting...';
+
+      // Redirect to Apps Script web app — triggers save + shows success page
+      window.location.href = `${GAS_URL}?selectedValue=${encodeURIComponent(selectedValue)}`;
+    }
+
+    // Run on page load
+    window.addEventListener('DOMContentLoaded', async () => {
+      await loadHeader();
+      await loadOptions();
+    });
+  </script>
+
+</body>
+</html>
