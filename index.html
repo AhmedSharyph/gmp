@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Child Nutrition & Growth Monitoring Assessment Tool</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <div class="max-w-5xl mx-auto p-4">
+    <h1 class="text-2xl font-bold mb-4">🧒 Child Nutrition & Growth Monitoring Assessment Tool</h1>
+
+    <!-- Section A: Facility Information -->
+    <section class="mb-6 p-4 bg-white rounded shadow">
+      <h2 class="text-xl font-semibold mb-2">📍 Facility Information</h2>
+      <div class="mb-3">
+        <label class="block font-medium">1. Name of health facility:</label>
+        <input type="text" id="facility_name" class="w-full border p-2 rounded" placeholder="Enter facility name">
+      </div>
+
+      <div class="mb-3">
+        <label class="block font-medium">2. Who conducts GMP?</label>
+        <input type="text" id="staff_name" class="w-full border p-2 rounded mb-1" placeholder="Staff Name">
+        <input type="text" id="staff_title" class="w-full border p-2 rounded mb-1" placeholder="Title">
+        <input type="text" id="staff_contact" class="w-full border p-2 rounded mb-1" placeholder="Contact">
+        <label class="inline-flex items-center mt-1">
+          <input type="checkbox" id="iycf_training" class="mr-2">Training in IYCF or GMP
+        </label>
+      </div>
+
+      <div class="mb-3">
+        <label class="block font-medium">3. How many children under five?</label>
+        <input type="number" id="children_under5" class="w-full border p-2 rounded">
+      </div>
+      <div class="mb-3">
+        <label class="block font-medium">4. How many children under 2?</label>
+        <input type="number" id="children_under2" class="w-full border p-2 rounded">
+      </div>
+      <div class="mb-3">
+        <label class="block font-medium">5. How many children under 2 years attending regular GMP?</label>
+        <input type="number" id="children_under2_gmp" class="w-full border p-2 rounded">
+      </div>
+    </section>
+
+    <!-- Section 2: Child Nutrition Prevalence Data -->
+    <section class="mb-6 p-4 bg-white rounded shadow">
+      <h2 class="text-xl font-semibold mb-2">📊 Child Nutrition Prevalence Data</h2>
+
+      <div class="mb-3">
+        <label class="block font-medium">2.1 How many children under 5 attending regular GMP?</label>
+        <input type="number" id="under5_attending_gmp" class="w-full border p-2 rounded">
+      </div>
+
+      <div class="mb-3">
+        <label class="block font-medium">2.2 Among children under 5 (monthly data):</label>
+        <div class="grid grid-cols-2 gap-2 mt-1">
+          <div><label>Underweight:</label><input type="number" id="under5_underweight" class="border p-1 rounded w-full"></div>
+          <div><label>Stunted:</label><input type="number" id="under5_stunted" class="border p-1 rounded w-full"></div>
+          <div><label>Wasted:</label><input type="number" id="under5_wasted" class="border p-1 rounded w-full"></div>
+          <div><label>Overweight:</label><input type="number" id="under5_overweight" class="border p-1 rounded w-full"></div>
+          <div><label>Obesity:</label><input type="number" id="under5_obesity" class="border p-1 rounded w-full"></div>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="block font-medium">2.3 How many children under 2 attending GMP / screened regularly?</label>
+        <input type="number" id="under2_attending_gmp" class="w-full border p-2 rounded">
+      </div>
+
+      <div class="mb-3">
+        <label class="block font-medium">2.4 Among children under 2 (monthly data):</label>
+        <div class="grid grid-cols-2 gap-2 mt-1">
+          <div><label>Underweight:</label><input type="number" id="under2_underweight" class="border p-1 rounded w-full"></div>
+          <div><label>Stunted:</label><input type="number" id="under2_stunted" class="border p-1 rounded w-full"></div>
+          <div><label>Wasted:</label><input type="number" id="under2_wasted" class="border p-1 rounded w-full"></div>
+          <div><label>Overweight:</label><input type="number" id="under2_overweight" class="border p-1 rounded w-full"></div>
+          <div><label>Obesity:</label><input type="number" id="under2_obesity" class="border p-1 rounded w-full"></div>
+        </div>
+      </div>
+
+      <!-- Growth Indicator Reference Table -->
+      <div class="mb-3 p-3 border rounded bg-gray-50">
+        <h3 class="font-semibold mb-2">Growth Indicator Reference</h3>
+        <table class="table-auto border-collapse border border-gray-300 w-full text-sm">
+          <thead>
+            <tr class="bg-gray-200">
+              <th class="border px-2 py-1">Condition</th>
+              <th class="border px-2 py-1">Growth Indicator</th>
+              <th class="border px-2 py-1">Z-Score Cut-Off</th>
+              <th class="border px-2 py-1">Definition</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="border px-2 py-1">Stunting</td>
+              <td class="border px-2 py-1">Height-for-age (HAZ)</td>
+              <td class="border px-2 py-1">&lt; -2 SD</td>
+              <td class="border px-2 py-1">Child is too short for age due to chronic malnutrition</td>
+            </tr>
+            <tr>
+              <td class="border px-2 py-1">Wasting</td>
+              <td class="border px-2 py-1">Weight-for-height (WHZ)</td>
+              <td class="border px-2 py-1">&lt; -2 SD</td>
+              <td class="border px-2 py-1">Child is too thin for height due to acute malnutrition</td>
+            </tr>
+            <tr>
+              <td class="border px-2 py-1">Underweight</td>
+              <td class="border px-2 py-1">Weight-for-age (WAZ)</td>
+              <td class="border px-2 py-1">&lt; -2 SD</td>
+              <td class="border px-2 py-1">Child has low weight for age, may reflect both stunting and wasting</td>
+            </tr>
+            <tr>
+              <td class="border px-2 py-1">Overweight</td>
+              <td class="border px-2 py-1">Weight-for-height (WHZ)</td>
+              <td class="border px-2 py-1">&gt; +2 SD and ≤ +3 SD</td>
+              <td class="border px-2 py-1">Child has excess weight for height, early sign of overnutrition</td>
+            </tr>
+            <tr>
+              <td class="border px-2 py-1">Obesity</td>
+              <td class="border px-2 py-1">BMI-for-age (BMIZ)</td>
+              <td class="border px-2 py-1">&gt; +3 SD</td>
+              <td class="border px-2 py-1">Child has significantly high body mass for age, indicating obesity</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 3: Growth Monitoring Practices -->
+    <section class="mb-6 p-4 bg-white rounded shadow">
+      <h2 class="text-xl font-semibold mb-2">📏 Growth Monitoring Practices</h2>
+
+      <div class="mb-3">
+        <label>3.1 Is growth monitoring routinely conducted?</label>
+        <select id="growth_monitoring_routine" class="w-full border p-2 rounded">
+          <option>Yes</option>
+          <option>No</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label>3.2 Is developmental tracking done on the book?</label>
+        <select id="development_tracking_book" class="w-full border p-2 rounded">
+          <option>Yes</option>
+          <option>No</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label>3.3 Does the facility enter Child development tracking into DHIS2?</label>
+        <select id="development_tracking_dhis2" class="w-full border p-2 rounded">
+          <option>Yes</option>
+          <option>No</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label>3.4 Is nutrition counseling or IYCF provided during visits?</label>
+        <select id="iycf_provided" class="w-full border p-2 rounded">
+          <option>Yes</option>
+          <option>No</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label>3.4. If yes, topics covered:</label>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <label><input type="checkbox" id="exclusive_breastfeeding" class="mr-2">Exclusive Breastfeeding</label>
+          <label><input type="checkbox" id="complementary_feeding" class="mr-2">Complementary Feeding</label>
+          <label><input type="checkbox" id="responsive_feeding" class="mr-2">Responsive Feeding</label>
+          <label><input type="checkbox" id="feeding_during_illness" class="mr-2">Feeding during illness</label>
+          <label><input type="checkbox" id="fussy_eating" class="mr-2">Fussy eating / not eating</label>
+          <label><input type="checkbox" id="feeding_faltering_growth" class="mr-2">Feeding when growth is faltering</label>
+          <label><input type="checkbox" id="feeding_overweight" class="mr-2">Feeding practices for children who are overweight</label>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label>3.5 Any child identified with delays this year?</label>
+        <select id="child_delay" class="w-full border p-2 rounded">
+          <option>Yes</option>
+          <option>No</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label>3.5.1 If so, what do you tell the parent?</label>
+        <textarea id="delay_comments" class="w-full border p-2 rounded" rows="3"></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label>3.6 Are growth charts properly filled and interpreted?</label>
+        <select id="growth_chart_filled" class="w-full border p-2 rounded">
+          <option>Yes</option>
+          <option>No</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label>3.7 Were any group sessions held for parents this year?</label>
+        <select id="group_sessions" class="w-full border p-2 rounded">
+          <option>Yes</option>
+          <option>No</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label>3.7.1 How many sessions?</label>
+        <input type="number" id="num_sessions" class="w-full border p-2 rounded">
+      </div>
+    </section>
+
+    <!-- Section 4: Other Public Health Programs -->
+    <section class="mb-6 p-4 bg-white rounded shadow">
+      <h2 class="text-xl font-semibold mb-2">🛠️ Other – Public Health Programs & Events</h2>
+
+      <div class="mb-3">
+        <label>4.1 Key issues affecting adolescents & young people’s health (select all that apply):</label>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-1">
+          <label><input type="checkbox" id="unhealthy_diet" class="mr-2">Unhealthy diet</label>
+          <label><input type="checkbox" id="skipping_meals" class="mr-2">Skipping meals</label>
+          <label><input type="checkbox" id="soft_drinks" class="mr-2">Eating soft drinks & energy drinks</label>
+          <label><input type="checkbox" id="mental_health_problems" class="mr-2">Mental health problems (not illness)</label>
+          <label><input type="checkbox" id="mental_health_illness" class="mr-2">Mental health illness</label>
+          <label><input type="checkbox" id="diabetes" class="mr-2">Diabetes</label>
+          <label><input type="checkbox" id="cancer" class="mr-2">Cancer</label>
+          <label><input type="checkbox" id="other_ncds" class="mr-2">Other NCDs</label>
+          <label><input type="checkbox" id="not_active" class="mr-2">Not active</label>
+          <label><input type="checkbox" id="smoking_vaping" class="mr-2">Smoking & vaping</label>
+          <label><input type="checkbox" id="drugs" class="mr-2">Drugs</label>
+          <label><input type="checkbox" id="unwanted_pregnancies" class="mr-2">Unwanted pregnancies</label>
+          <label><input type="checkbox" id="disabilities" class="mr-2">Disabilities</label>
+          <label><input type="checkbox" id="high_screen_time" class="mr-2">High screen time</label>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label>4.2 Prevention activities conducted:</label>
+        <textarea id="prevention_activities" class="w-full border p-2 rounded" rows="3"></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label>4.3 Do you conduct health promotion, community engagement, or outreach?</label>
+        <select id="health_promotion" class="w-full border p-2 rounded">
+          <option>Yes</option>
+          <option>No</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label>4.4 How many activities were conducted this year?</label>
+        <input type="number" id="num_activities" class="w-full border p-2 rounded">
+      </div>
+    </section>
+
+    <button class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 mt-4">Submit</button>
+  </div>
+</body>
+</html>
