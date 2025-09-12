@@ -1,72 +1,16 @@
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GMP Form</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="p-4 bg-slate-50">
-
-<h1 class="text-xl font-bold mb-4">Child Nutrition Form</h1>
-
-<form id="gmpForm" class="max-w-md bg-white p-4 rounded shadow">
-  <label for="facility_name" class="block mb-2 font-semibold">Health Facility</label>
-  <select id="facility_name" class="w-full border p-2 rounded mb-4"></select>
-
-  <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Submit</button>
+<form name="submit-to-google-sheet">
+  <input name="email" type="email" placeholder="Email" required>
+  <button type="submit">Send</button>
 </form>
 
-<div id="message" class="mt-4 font-semibold"></div>
-
 <script>
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzlZNy1VnNE5iy0jsbHaObJpSmZr3z7pYQhU4vSUk5wD8yd2HEJBHV3mAQ5VlCNtmZr/exec";
+  const scriptURL = '<SCRIPT URL>'
+  const form = document.forms['submit-to-google-sheet']
 
-  // Load facilities
-  fetch(WEB_APP_URL + "?action=facilities")
-    .then(res => res.json())
-    .then(data => {
-      const select = document.getElementById('facility_name');
-      data.forEach(facility => {
-        const option = document.createElement('option');
-        option.value = facility;
-        option.text = facility;
-        select.appendChild(option);
-      });
-      new Choices(select, {
-        searchEnabled: true,
-        placeholder: true,
-        placeholderValue: 'Select or type a facility'
-      });
-    })
-    .catch(console.error);
-
-  // Handle form submit
-  document.getElementById('gmpForm').addEventListener('submit', function(e){
-    e.preventDefault();
-    const facility_name = document.getElementById('facility_name').value;
-
-    fetch(WEB_APP_URL, {
-      method: 'POST',
-      body: JSON.stringify({facility_name}),
-      headers: {'Content-Type': 'application/json'}
-    })
-    .then(res => res.json())
-    .then(resp => {
-      if(resp.status === "success"){
-        document.getElementById('message').textContent = "Form submitted successfully!";
-        document.getElementById('gmpForm').reset();
-      }
-    })
-    .catch(err => {
-      document.getElementById('message').textContent = "Submission failed!";
-      console.error(err);
-    });
-  });
+  form.addEventListener('submit', e => {
+    e.preventDefault()
+    fetch(scriptURL, { method: 'POST', body: new FormData(form)})
+      .then(response => console.log('Success!', response))
+      .catch(error => console.error('Error!', error.message))
+  })
 </script>
-
-</body>
-</html>
