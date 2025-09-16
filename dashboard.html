@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Child Nutrition Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body class="bg-gray-100 p-6">
+
+<div class="max-w-6xl mx-auto">
+  <h1 class="text-3xl font-bold mb-6 text-center">🧒 Child Nutrition Dashboard</h1>
+
+  <!-- Filters & Export -->
+  <div class="flex flex-col sm:flex-row justify-between mb-4 gap-2">
+    <select id="facilityFilter" class="border rounded px-3 py-1">
+      <option value="">All Facilities</option>
+    </select>
+
+    <div class="flex gap-2">
+      <button id="exportExcel" class="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700">Excel</button>
+      <button id="exportPDF" class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700">PDF</button>
+      <button id="toggleTable" class="bg-gray-600 text-white px-4 py-1 rounded hover:bg-gray-700">Table</button>
+    </div>
+  </div>
+
+  <!-- Dashboard Cards -->
+  <div id="dashboard" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6"></div>
+
+  <!-- Data Table -->
+  <div id="dataTableContainer" class="hidden bg-white p-4 rounded shadow overflow-x-auto">
+    <table id="dataTable" class="min-w-full border border-gray-300"></table>
+  </div>
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbzrq5jF8l3ClBCAjg2Yj5OVp1mMw4jQrysJ45fwiWaINy8miV2Gd6vr0MYedIDWyJjhGQ/exec"; // Replace with your Apps Script URL
+let rawData = [];
+let filteredData = [];
+
+// Fetch data
+async function fetchData() {
+  try {
+    const res = await fetch(API_URL);
+    rawData = await res.json();
+    if (!Array.isArray(rawData)) rawData = [];
+    populateFilter();
+    applyFilter();
+  } catch (err) {
+    console.error("Error fetching data:", err);
+  }
+}
+
+// Populate facility filter dropdown
+function populateFilter() {
+  const select = document.getElementById("facilityFilter");
+  const facilities = Array.from(new Set(rawData.map(d => d.healthFacility))).filter(Boolean);
+  facilities.forEach(f => {
+    const opt = document.createElement("option");
+    opt.value = f;
+    opt.textContent = f;
+    select.appendChild(opt);
+  });
+
+  select.addEventListener("change", applyFilter);
+}
+
+// Apply filter and render dashboard
+function applyFilter() {
+  const facility = document.getElementById("facilityFilter").value;
+  filteredData = facility ? rawData.filter(d => d.healthFacility === facility) : rawData;
+  renderDashboard();
+  renderTable();
+}
+
+// Render small cards
+function renderDashboard() {
+  const container = document.getElementById("dashboard");
+  container.innerHTML = "";
+
+  filteredData.forEach((row, idx) => {
+    const card = document.createElement("div");
+    card.className = "bg-white p-3 rounded shadow flex flex-col items-center space-y-2";
+
+    card.innerHTML = `
+      <h2 class="font-semibold text-lg text-center">${row.healthFacility || 'Facility ' + (idx+1)}</h2>
+      <p class="text-sm">Staff: ${row.staffName || '-'}</p>
+      <p class="text-sm">Under 5: ${row.childrenUnder5 || 0}</p>
+      <p class="text-sm">Under 2: ${row.childrenUnder2 || 0}</p>
+      <canvas id="chart${idx}" class="w-full" height="100"></canvas>
+    `;
+    container.appendChild(card);
+
+    // Nutrition chart inside card
+    const ctx = document.getElementById("chart" + idx).getContext("2d");
+    new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        labels: ["Underweight","Stunted","Wasted","Overweight","Obesity"],
+        datasets: [{
+          label: "Children <5",
+          data: [
+            Number(row.underweight5||0),
+            Number(row.stunted5||0),
+            Number(row.wasted5||0),
+            Number(row.overweight5||0),
+            Number(row.obesity5||0)
+          ],
+          backgroundColor:["#f87171","#fb923c","#facc15","#4ade80","#22d3ee"]
+        }]
+      },
+      options: { responsive:true, plugins:{ legend:{position:'bottom'} } }
+    });
+  });
+}
+
+// Render raw data table
+function renderTable() {
+  const table = document.getElementById("dataTable");
+  table.innerHTML = "";
+  if (!filteredData.length) return;
+
+  const headerRow = document.createElement("tr");
+  Object.keys(filteredData[0]).forEach(h => {
+    const th = document.createElement("th");
+    th.textContent = h;
+    th.className = "border px-2 py-1 bg-gray-200 text-xs";
+    headerRow.appendChild(th);
+  });
+  table.appendChild(headerRow);
+
+  filteredData.forEach(row => {
+    const tr = document.createElement("tr");
+    Object.values(row).forEach(v => {
+      const td = document.createElement("td");
+      td.textContent = v;
+      td.className = "border px-2 py-1 text-xs";
+      tr.appendChild(td);
+    });
+    table.appendChild(tr);
+  });
+}
+
+// Toggle table visibility
+document.getElementById("toggleTable").addEventListener("click", () => {
+  document.getElementById("dataTableContainer").classList.toggle("hidden");
+});
+
+// Export Excel
+document.getElementById("exportExcel").addEventListener("click", () => {
+  const ws = XLSX.utils.json_to_sheet(filteredData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "GMP Data");
+  XLSX.writeFile(wb, "gmp_data.xlsx");
+});
+
+// Export PDF
+document.getElementById("exportPDF").addEventListener("click", () => {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  filteredData.forEach((row, i) => {
+    doc.text(`Facility ${i+1}: ${row.healthFacility || '-'}`, 10, 10 + i*10);
+  });
+  doc.save("gmp_data.pdf");
+});
+
+// Initialize
+fetchData();
+</script>
+</body>
+</html>
