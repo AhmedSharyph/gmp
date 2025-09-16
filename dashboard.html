@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GMP Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+
+  <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+    <h1 class="text-2xl font-bold mb-4">📊 GMP Dashboard</h1>
+
+    <!-- Summary cards -->
+    <div id="summary" class="grid grid-cols-3 gap-4 mb-6"></div>
+
+    <!-- Facility filter -->
+    <div class="mb-4">
+      <label class="block font-medium mb-1">Filter by Health Facility:</label>
+      <select id="facilityFilter" class="border rounded p-2 w-full"></select>
+    </div>
+
+    <!-- Data Table -->
+    <div class="overflow-x-auto">
+      <table class="min-w-full border border-gray-300 text-sm">
+        <thead class="bg-gray-200">
+          <tr id="tableHeader"></tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // 🔹 REPLACE with your Apps Script Web App URL
+    const API_URL = "https://script.google.com/macros/s/AKfycbzrq5jF8l3ClBCAjg2Yj5OVp1mMw4jQrysJ45fwiWaINy8miV2Gd6vr0MYedIDWyJjhGQ/exec";
+
+    let allData = [];
+
+    async function loadData() {
+      try {
+        const res = await fetch(API_URL);
+        allData = await res.json();
+        if (!Array.isArray(allData)) throw new Error("Invalid data format");
+
+        populateFacilityFilter();
+        renderTable(allData);
+        renderSummary(allData);
+      } catch (err) {
+        alert("Error loading data: " + err.message);
+      }
+    }
+
+    function populateFacilityFilter() {
+      const select = document.getElementById("facilityFilter");
+      const facilities = [...new Set(allData.map(d => d.healthFacility))].sort();
+
+      select.innerHTML = `<option value="">All Facilities</option>`;
+      facilities.forEach(f => {
+        const opt = document.createElement("option");
+        opt.value = f;
+        opt.textContent = f;
+        select.appendChild(opt);
+      });
+
+      select.addEventListener("change", () => {
+        const val = select.value;
+        const filtered = val ? allData.filter(d => d.healthFacility === val) : allData;
+        renderTable(filtered);
+        renderSummary(filtered);
+      });
+    }
+
+    function renderTable(data) {
+      const header = document.getElementById("tableHeader");
+      const body = document.getElementById("tableBody");
+      header.innerHTML = "";
+      body.innerHTML = "";
+
+      if (!data.length) return;
+
+      // Table headers
+      Object.keys(data[0]).forEach(h => {
+        const th = document.createElement("th");
+        th.textContent = h;
+        th.className = "border px-2 py-1 text-left";
+        header.appendChild(th);
+      });
+
+      // Table rows
+      data.forEach(row => {
+        const tr = document.createElement("tr");
+        Object.values(row).forEach(val => {
+          const td = document.createElement("td");
+          td.textContent = val;
+          td.className = "border px-2 py-1";
+          tr.appendChild(td);
+        });
+        body.appendChild(tr);
+      });
+    }
+
+    function renderSummary(data) {
+      const summary = document.getElementById("summary");
+      summary.innerHTML = "";
+
+      if (!data.length) return;
+
+      const totalFacilities = [...new Set(data.map(d => d.healthFacility))].length;
+      const totalU5 = data.reduce((s, d) => s + (Number(d.childrenUnder5) || 0), 0);
+      const totalU2 = data.reduce((s, d) => s + (Number(d.childrenUnder2) || 0), 0);
+
+      const cards = [
+        { title: "Facilities", value: totalFacilities },
+        { title: "Children <5", value: totalU5 },
+        { title: "Children <2", value: totalU2 },
+      ];
+
+      cards.forEach(c => {
+        const div = document.createElement("div");
+        div.className = "bg-blue-100 p-4 rounded shadow text-center";
+        div.innerHTML = `<div class="text-xl font-bold">${c.value}</div><div>${c.title}</div>`;
+        summary.appendChild(div);
+      });
+    }
+
+    loadData();
+  </script>
+
+</body>
+</html>
