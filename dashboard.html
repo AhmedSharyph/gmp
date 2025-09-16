@@ -4,28 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GMP Dashboard</title>
-
-<!-- Tailwind CSS -->
 <script src="https://cdn.tailwindcss.com"></script>
-
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script><!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GMP Dashboard</title>
-
-<!-- Tailwind CSS -->
-<script src="https://cdn.tailwindcss.com"></script>
-
-<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- SheetJS for Excel export -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-
-<!-- jsPDF + html2canvas for PDF export -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
@@ -40,271 +21,27 @@
     <select id="facilityFilter" class="w-full border rounded p-2"></select>
   </div>
 
-  <!-- Section 1: Facility Info Cards -->
-  <h2 class="text-xl font-semibold mb-2">📍 Facility Information</h2>
-  <div id="facilityCards" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"></div>
+  <!-- Section Cards -->
+  <div id="cardsContainer" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"></div>
 
-  <!-- Section 2: Child Nutrition Charts -->
-  <h2 class="text-xl font-semibold mb-2">📊 Child Nutrition Prevalence</h2>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-    <canvas id="nutritionUnder5Chart"></canvas>
-    <canvas id="nutritionUnder2Chart"></canvas>
-  </div>
-
-  <!-- Section 3: Growth Monitoring Practices -->
-  <h2 class="text-xl font-semibold mb-2">📏 Growth Monitoring Practices</h2>
-  <canvas id="growthPracticesChart" class="mb-6"></canvas>
-
-  <!-- Section 4: Public Health Programs -->
-  <h2 class="text-xl font-semibold mb-2">🛠️ Public Health Programs</h2>
-  <canvas id="publicHealthChart" class="mb-6"></canvas>
-
-  <!-- Raw Data Table & Export -->
-  <button id="toggleTableBtn" class="bg-blue-600 text-white px-4 py-2 rounded mb-4 hover:bg-blue-700">Show Data Table</button>
-  <div id="dataTableWrapper" class="hidden">
-    <table id="dataTable" class="min-w-full border border-gray-300 text-sm mb-4"></table>
-    <div class="flex gap-2 mb-6">
-      <button id="exportExcelBtn" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Export Excel</button>
-      <button id="exportPdfBtn" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Export PDF</button>
+  <!-- Section Charts -->
+  <div class="mb-6">
+    <h2 class="text-xl font-semibold mb-2">📊 Child Nutrition Prevalence</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <canvas id="nutritionUnder5Chart"></canvas>
+      <canvas id="nutritionUnder2Chart"></canvas>
     </div>
   </div>
-</div>
 
-<script>
-const API_URL = "https://script.google.com/macros/s/AKfycbyUlbwuQHD5tkCef0ModjzMjNmEJQYJFqlNXVNu9q-kzYE09Iad8qcfbVq57R-pYmHH/exec";
-let allData = [];
-let charts = {};
-
-// Utility functions
-const sumField = (data, field) => data.reduce((s,d)=>s+Number(d[field]||0),0);
-const countYes = (data, field) => data.filter(d=>d[field]==="Yes").length;
-
-// Load data from Apps Script
-async function loadData() {
-  try {
-    const res = await fetch(API_URL);
-    allData = await res.json();
-    populateFacilityFilter();
-    updateDashboard(allData);
-  } catch (err) {
-    alert("Error loading data: " + err.message);
-  }
-}
-
-// Populate facility filter
-function populateFacilityFilter() {
-  const select = document.getElementById("facilityFilter");
-  const facilities = [...new Set(allData.map(d => d['healthFacility']))].sort();
-  select.innerHTML = `<option value="">All Facilities</option>`;
-  facilities.forEach(f => {
-    const opt = document.createElement("option");
-    opt.value = f;
-    opt.textContent = f;
-    select.appendChild(opt);
-  });
-
-  select.addEventListener("change", () => {
-    const val = select.value;
-    const filtered = val ? allData.filter(d => d['healthFacility'] === val) : allData;
-    updateDashboard(filtered);
-  });
-}
-
-// Update dashboard: cards, charts, table
-function updateDashboard(data) {
-  renderCards(data);
-  renderNutritionCharts(data);
-  renderGrowthChart(data);
-  renderPublicHealthChart(data);
-  renderTable(data);
-}
-
-// Facility Cards
-function renderCards(data) {
-  const container = document.getElementById("facilityCards");
-  container.innerHTML = "";
-  if (!data.length) return;
-
-  const metrics = [
-    { title: "Children <5", value: sumField(data,"childrenUnder5") },
-    { title: "Children <2", value: sumField(data,"childrenUnder2") },
-    { title: "Children <2 GMP", value: sumField(data,"childrenUnder2GMP") },
-  ];
-
-  metrics.forEach(m => {
-    const card = document.createElement("div");
-    card.className = "bg-blue-100 p-4 rounded shadow text-center";
-    card.innerHTML = `<div class="text-xl font-bold">${m.value}</div><div>${m.title}</div>`;
-    container.appendChild(card);
-  });
-}
-
-// Nutrition Charts
-function renderNutritionCharts(data) {
-  const labels = ["Underweight","Stunted","Wasted","Overweight","Obesity"];
-  const under5 = labels.map(l => sumField(data,l+"5"));
-  const under2 = labels.map(l => sumField(data,l+"2"));
-
-  const ctx5 = document.getElementById("nutritionUnder5Chart").getContext("2d");
-  if(charts.under5) charts.under5.destroy();
-  charts.under5 = new Chart(ctx5,{
-    type:"bar",
-    data:{ labels, datasets:[{ label:"Children <5", data:under5, backgroundColor:"#3b82f6" }] },
-    options:{ responsive:true, plugins:{ legend:{ display:false } } }
-  });
-
-  const ctx2 = document.getElementById("nutritionUnder2Chart").getContext("2d");
-  if(charts.under2) charts.under2.destroy();
-  charts.under2 = new Chart(ctx2,{
-    type:"bar",
-    data:{ labels, datasets:[{ label:"Children <2", data:under2, backgroundColor:"#ef4444" }] },
-    options:{ responsive:true, plugins:{ legend:{ display:false } } }
-  });
-}
-
-// Growth Monitoring Practices
-function renderGrowthChart(data){
-  const labels = [
-    "Routine Growth Monitoring",
-    "Nutrition Counseling",
-    "Child Delays Identified",
-    "Group Sessions Held"
-  ];
-  const counts = [
-    countYes(data,"growthMonitoring"),
-    countYes(data,"nutritionCounseling"),
-    countYes(data,"childDelays"),
-    countYes(data,"groupSession")
-  ];
-
-  const ctx = document.getElementById("growthPracticesChart").getContext("2d");
-  if(charts.growth) charts.growth.destroy();
-  charts.growth = new Chart(ctx,{
-    type:"pie",
-    data:{ labels, datasets:[{ data:counts, backgroundColor:["#3b82f6","#f97316","#10b981","#ef4444"]] } },
-    options:{ responsive:true }
-  });
-}
-
-// Public Health Programs
-function renderPublicHealthChart(data){
-  const issues = [
-    "Unhealthy diet","Skipping meals","Soft drinks & energy drinks","Mental health problems",
-    "Mental health illness","Diabetes","Cancer","Other NCDs","Not active","Smoking & vaping",
-    "Drugs","Unwanted pregnancies","Disabilities","High Screen time"
-  ];
-  const counts = issues.map(i => data.filter(d=>d['issues']?.includes(i)).length);
-
-  const ctx = document.getElementById("publicHealthChart").getContext("2d");
-  if(charts.public) charts.public.destroy();
-  charts.public = new Chart(ctx,{
-    type:"bar",
-    data:{ labels:issues, datasets:[{ label:"Count", data:counts, backgroundColor:"#8b5cf6" }] },
-    options:{ responsive:true, plugins:{ legend:{ display:false } }, indexAxis:'y' }
-  });
-}
-
-// Table
-function renderTable(data){
-  const wrapper = document.getElementById("dataTableWrapper");
-  const table = document.getElementById("dataTable");
-  table.innerHTML = "";
-  if(!data.length) return;
-
-  const headers = Object.keys(data[0]);
-  const thead = document.createElement("tr");
-  headers.forEach(h => {
-    const th = document.createElement("th");
-    th.textContent = h;
-    th.className = "border px-2 py-1 bg-gray-200";
-    thead.appendChild(th);
-  });
-  table.appendChild(thead);
-
-  data.forEach(r=>{
-    const tr = document.createElement("tr");
-    Object.values(r).forEach(v=>{
-      const td = document.createElement("td");
-      td.textContent = v;
-      td.className="border px-2 py-1";
-      tr.appendChild(td);
-    });
-    table.appendChild(tr);
-  });
-}
-
-// Table toggle
-document.getElementById("toggleTableBtn").addEventListener("click",()=>{
-  const wrapper = document.getElementById("dataTableWrapper");
-  wrapper.classList.toggle("hidden");
-  document.getElementById("toggleTableBtn").textContent =
-    wrapper.classList.contains("hidden") ? "Show Data Table" : "Hide Data Table";
-});
-
-// Export Excel
-document.getElementById("exportExcelBtn").addEventListener("click",()=>{
-  const ws = XLSX.utils.table_to_sheet(document.getElementById("dataTable"));
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,"GMP Data");
-  XLSX.writeFile(wb,"GMP_Data.xlsx");
-});
-
-// Export PDF
-document.getElementById("exportPdfBtn").addEventListener("click",()=>{
-  const wrapper = document.getElementById("dataTableWrapper");
-  html2canvas(wrapper).then(canvas=>{
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jspdf.jsPDF({orientation:"landscape"});
-    const imgProps = pdf.getImageProperties(imgData);
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-    pdf.addImage(imgData,"PNG",0,0,pdfWidth,pdfHeight);
-    pdf.save("GMP_Data.pdf");
-  });
-});
-
-loadData();
-</script>
-</body>
-</html>
-
-
-<!-- SheetJS for Excel Export -->
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-
-<!-- jsPDF + html2canvas for PDF Export -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-</head>
-<body class="bg-gray-100 p-6">
-
-<div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-lg">
-  <h1 class="text-2xl font-bold mb-6">📊 Child Nutrition & Growth Monitoring Dashboard</h1>
-
-  <!-- Facility Filter -->
   <div class="mb-6">
-    <label class="block font-medium mb-1">Filter by Health Facility:</label>
-    <select id="facilityFilter" class="border rounded p-2 w-full"></select>
+    <h2 class="text-xl font-semibold mb-2">📏 Growth Monitoring Practices</h2>
+    <canvas id="growthPracticesChart"></canvas>
   </div>
 
-  <!-- Section 1: Facility Info Cards -->
-  <h2 class="text-xl font-semibold mb-2">📍 Facility Information</h2>
-  <div id="facilityCards" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6"></div>
-
-  <!-- Section 2: Child Nutrition Prevalence -->
-  <h2 class="text-xl font-semibold mb-2">📊 Child Nutrition Prevalence</h2>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-    <canvas id="nutritionUnder5Chart"></canvas>
-    <canvas id="nutritionUnder2Chart"></canvas>
+  <div class="mb-6">
+    <h2 class="text-xl font-semibold mb-2">🛠️ Public Health Programs</h2>
+    <canvas id="publicHealthChart"></canvas>
   </div>
-
-  <!-- Section 3: Growth Monitoring Practices -->
-  <h2 class="text-xl font-semibold mb-2">📏 Growth Monitoring Practices</h2>
-  <canvas id="growthPracticesChart" class="mb-6"></canvas>
-
-  <!-- Section 4: Public Health Programs -->
-  <h2 class="text-xl font-semibold mb-2">🛠️ Public Health Programs</h2>
-  <canvas id="publicHealthChart" class="mb-6"></canvas>
 
   <!-- Raw Data Table & Export -->
   <button id="toggleTableBtn" class="bg-blue-600 text-white px-4 py-2 rounded mb-4 hover:bg-blue-700">Show Data Table</button>
@@ -322,46 +59,37 @@ const API_URL = "https://script.google.com/macros/s/AKfycbzrq5jF8l3ClBCAjg2Yj5OV
 let allData = [];
 let charts = {};
 
-// Utility: Sum numeric field
+// Helpers
 const sumField = (data, field) => data.reduce((s,d)=>s+Number(d[field]||0),0);
-// Utility: Count Yes values
 const countYes = (data, field) => data.filter(d=>d[field]==="Yes").length;
 
-// Fetch data from Apps Script
+// Fetch data
 async function loadData() {
-  try {
-    const res = await fetch(API_URL);
-    allData = await res.json();
-    if (!Array.isArray(allData)) throw new Error("Invalid data format");
-    populateFacilityFilter();
-    updateDashboard(allData);
-  } catch (err) {
-    alert("Error loading data: " + err.message);
-  }
+  const res = await fetch(API_URL);
+  allData = await res.json();
+  populateFacilityFilter();
+  updateDashboard(allData);
 }
 
-// Facility Filter
+// Facility filter
 function populateFacilityFilter() {
   const select = document.getElementById("facilityFilter");
-  const facilities = [...new Set(allData.map(d => d['Name of health facilit']))].sort();
-
+  const facilities = [...new Set(allData.map(d => d.healthFacility))].sort();
   select.innerHTML = `<option value="">All Facilities</option>`;
   facilities.forEach(f => {
     const opt = document.createElement("option");
-    opt.value = f;
-    opt.textContent = f;
+    opt.value = f; opt.textContent = f;
     select.appendChild(opt);
   });
 
-  select.addEventListener("change", () => {
-    const val = select.value;
-    const filtered = val ? allData.filter(d => d['Name of health facilit'] === val) : allData;
+  select.addEventListener("change", ()=>{
+    const filtered = select.value ? allData.filter(d => d.healthFacility===select.value) : allData;
     updateDashboard(filtered);
   });
 }
 
-// Update Cards, Charts, Table
-function updateDashboard(data) {
+// Update Dashboard
+function updateDashboard(data){
   renderCards(data);
   renderNutritionCharts(data);
   renderGrowthChart(data);
@@ -369,145 +97,104 @@ function updateDashboard(data) {
   renderTable(data);
 }
 
-// Cards: Facility Info
-function renderCards(data) {
-  const container = document.getElementById("facilityCards");
+// Cards
+function renderCards(data){
+  const container = document.getElementById("cardsContainer");
   container.innerHTML = "";
 
-  if (!data.length) return;
   const metrics = [
-    { title: "Children <5", value: sumField(data,"How many children under five?") },
-    { title: "Children <2", value: sumField(data,"How many children under 2?") },
-    { title: "Children <2 GMP", value: sumField(data,"How many children under 2 years attending regular GMP?") },
+    { title: "Children <5", value: sumField(data,"childrenUnder5") },
+    { title: "Children <2", value: sumField(data,"childrenUnder2") },
+    { title: "Children <2 GMP", value: sumField(data,"childrenUnder2GMP") }
   ];
 
-  metrics.forEach(m => {
+  metrics.forEach(m=>{
     const card = document.createElement("div");
-    card.className = "bg-blue-100 p-4 rounded shadow text-center";
-    card.innerHTML = `<div class="text-xl font-bold">${m.value}</div><div>${m.title}</div>`;
+    card.className="bg-blue-100 p-4 rounded shadow text-center";
+    card.innerHTML=`<div class="text-xl font-bold">${m.value}</div><div>${m.title}</div>`;
     container.appendChild(card);
   });
 }
 
-// Charts: Nutrition
-function renderNutritionCharts(data) {
-  const labels = ["Underweight","Stunted","Wasted","Overweight","Obesity"];
-  const under5 = labels.map(l => sumField(data,l));
-  const under2 = labels.map(l => sumField(data,l+"2"));
+// Nutrition charts
+function renderNutritionCharts(data){
+  const labels=["Underweight","Stunted","Wasted","Overweight","Obesity"];
+  const under5 = labels.map(l=>sumField(data,l+"5"));
+  const under2 = labels.map(l=>sumField(data,l+"2"));
 
   const ctx5 = document.getElementById("nutritionUnder5Chart").getContext("2d");
   if(charts.under5) charts.under5.destroy();
-  charts.under5 = new Chart(ctx5,{
-    type:"bar",
-    data:{ labels, datasets:[{ label:"Children <5", data:under5, backgroundColor:"#3b82f6" }] },
-    options:{ responsive:true, plugins:{ legend:{ display:false } } }
-  });
+  charts.under5 = new Chart(ctx5,{ type:"bar", data:{ labels, datasets:[{ label:"<5", data:under5, backgroundColor:"#3b82f6" }] }, options:{ responsive:true, plugins:{ legend:{ display:false } } } });
 
   const ctx2 = document.getElementById("nutritionUnder2Chart").getContext("2d");
   if(charts.under2) charts.under2.destroy();
-  charts.under2 = new Chart(ctx2,{
-    type:"bar",
-    data:{ labels, datasets:[{ label:"Children <2", data:under2, backgroundColor:"#ef4444" }] },
-    options:{ responsive:true, plugins:{ legend:{ display:false } } }
-  });
+  charts.under2 = new Chart(ctx2,{ type:"bar", data:{ labels, datasets:[{ label:"<2", data:under2, backgroundColor:"#ef4444" }] }, options:{ responsive:true, plugins:{ legend:{ display:false } } } });
 }
 
-// Charts: Growth Monitoring Practices
+// Growth practices
 function renderGrowthChart(data){
-  const labels = [
-    "Routine Growth Monitoring",
-    "Nutrition Counseling Provided",
-    "Child Delays Identified",
-    "Group Sessions Held"
-  ];
-  const counts = [
-    countYes(data,"Is growth monitoring routinely conducted?"),
-    countYes(data,"Is nutrition counseling or IYCF provided during visits?"),
-    countYes(data,"Any child identified with delays this year?"),
-    countYes(data,"Was any group sessions held to parents this year?")
-  ];
-
-  const ctx = document.getElementById("growthPracticesChart").getContext("2d");
+  const labels=["Routine Monitoring","Nutrition Counseling","Child Delays","Group Sessions"];
+  const counts=[countYes(data,"growthMonitoring"),countYes(data,"nutritionCounseling"),countYes(data,"childDelays"),countYes(data,"groupSession")];
+  const ctx=document.getElementById("growthPracticesChart").getContext("2d");
   if(charts.growth) charts.growth.destroy();
-  charts.growth = new Chart(ctx,{
-    type:"pie",
-    data:{ labels, datasets:[{ data:counts, backgroundColor:["#3b82f6","#f97316","#10b981","#ef4444"]] } },
-    options:{ responsive:true }
-  });
+  charts.growth=new Chart(ctx,{ type:"pie", data:{ labels, datasets:[{ data:counts, backgroundColor:["#3b82f6","#f97316","#10b981","#ef4444"] }] }, options:{ responsive:true } });
 }
 
-// Charts: Public Health Programs
+// Public health
 function renderPublicHealthChart(data){
-  const issues = [
-    "Unhealthy diet","Skipping meals","Eating soft drinks & energy drinks","Mental health problems",
+  const issues=[
+    "Unhealthy diet","Skipping meals","Soft drinks & energy drinks","Mental health problems",
     "Mental health illness","Diabetes","Cancer","Other NCDs","Not active","Smoking & vaping",
     "Drugs","Unwanted pregnancies","Disabilities","High Screen time"
   ];
-  const counts = issues.map(i => data.filter(d=>d['What are key issues affecting adolescents and young people’s health in the island?'].includes(i)).length);
-
+  const counts = issues.map(i => data.filter(d=>d.issues?.includes(i)).length);
   const ctx = document.getElementById("publicHealthChart").getContext("2d");
   if(charts.public) charts.public.destroy();
-  charts.public = new Chart(ctx,{
-    type:"bar",
-    data:{ labels:issues, datasets:[{ label:"Count", data:counts, backgroundColor:"#8b5cf6" }] },
-    options:{ responsive:true, plugins:{ legend:{ display:false } }, indexAxis:'y' }
-  });
+  charts.public=new Chart(ctx,{ type:"bar", data:{ labels:issues, datasets:[{ label:"Count", data:counts, backgroundColor:"#8b5cf6" }] }, options:{ indexAxis:'y', responsive:true, plugins:{ legend:{ display:false } } } });
 }
 
 // Table
 function renderTable(data){
-  const wrapper = document.getElementById("dataTableWrapper");
-  const table = document.getElementById("dataTable");
-  table.innerHTML = "";
+  const wrapper=document.getElementById("dataTableWrapper");
+  const table=document.getElementById("dataTable");
+  table.innerHTML="";
   if(!data.length) return;
-
-  const headers = Object.keys(data[0]);
-  const thead = document.createElement("tr");
-  headers.forEach(h => {
-    const th = document.createElement("th");
-    th.textContent = h;
-    th.className = "border px-2 py-1 bg-gray-200";
-    thead.appendChild(th);
-  });
+  const headers=Object.keys(data[0]);
+  const thead=document.createElement("tr");
+  headers.forEach(h=>{ const th=document.createElement("th"); th.textContent=h; th.className="border px-2 py-1 bg-gray-200"; thead.appendChild(th); });
   table.appendChild(thead);
 
   data.forEach(r=>{
-    const tr = document.createElement("tr");
-    Object.values(r).forEach(v=>{
-      const td = document.createElement("td");
-      td.textContent = v;
-      td.className="border px-2 py-1";
-      tr.appendChild(td);
-    });
+    const tr=document.createElement("tr");
+    Object.values(r).forEach(v=>{ const td=document.createElement("td"); td.textContent=v; td.className="border px-2 py-1"; tr.appendChild(td); });
     table.appendChild(tr);
   });
 }
 
-// Table Toggle
+// Toggle table
 document.getElementById("toggleTableBtn").addEventListener("click",()=>{
-  const wrapper = document.getElementById("dataTableWrapper");
+  const wrapper=document.getElementById("dataTableWrapper");
   wrapper.classList.toggle("hidden");
-  document.getElementById("toggleTableBtn").textContent =
-    wrapper.classList.contains("hidden") ? "Show Data Table" : "Hide Data Table";
+  document.getElementById("toggleTableBtn").textContent = wrapper.classList.contains("hidden")?"Show Data Table":"Hide Data Table";
 });
 
 // Export Excel
 document.getElementById("exportExcelBtn").addEventListener("click",()=>{
-  const ws = XLSX.utils.table_to_sheet(document.getElementById("dataTable"));
-  const wb = XLSX.utils.book_new();
+  const ws=XLSX.utils.table_to_sheet(document.getElementById("dataTable"));
+  const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,"GMP Data");
   XLSX.writeFile(wb,"GMP_Data.xlsx");
 });
 
 // Export PDF
 document.getElementById("exportPdfBtn").addEventListener("click",()=>{
-  const wrapper = document.getElementById("dataTableWrapper");
+  const wrapper=document.getElementById("dataTableWrapper");
   html2canvas(wrapper).then(canvas=>{
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jspdf.jsPDF({orientation:"landscape"});
+    const imgData=canvas.toDataURL("image/png");
+    const pdf=new jspdf.jsPDF({orientation:"landscape"});
     const imgProps = pdf.getImageProperties(imgData);
     const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    const pdfHeight = (imgProps.height*pdfWidth)/imgProps.width;
     pdf.addImage(imgData,"PNG",0,0,pdfWidth,pdfHeight);
     pdf.save("GMP_Data.pdf");
   });
