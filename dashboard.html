@@ -3,204 +3,152 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GMP Dashboard</title>
+<title>Child Nutrition Dashboard</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body class="bg-gray-100 p-6">
 
-<div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-lg">
-  <h1 class="text-2xl font-bold mb-6">📊 Child Nutrition & Growth Monitoring Dashboard</h1>
+<div class="max-w-6xl mx-auto">
+  <h1 class="text-3xl font-bold mb-6 text-center">🧒 Child Nutrition & Growth Monitoring Dashboard</h1>
 
-  <!-- Facility Filter -->
-  <div class="mb-6">
-    <label class="block font-medium mb-1">Filter by Health Facility:</label>
-    <select id="facilityFilter" class="w-full border rounded p-2"></select>
+  <div class="flex justify-end mb-4 space-x-2">
+    <button id="exportExcel" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Export Excel</button>
+    <button id="exportPDF" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Export PDF</button>
+    <button id="toggleTable" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">Toggle Table</button>
   </div>
 
-  <!-- Section Cards -->
-  <div id="cardsContainer" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"></div>
+  <!-- Dashboard Cards -->
+  <div id="dashboard" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6"></div>
 
-  <!-- Section Charts -->
-  <div class="mb-6">
-    <h2 class="text-xl font-semibold mb-2">📊 Child Nutrition Prevalence</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <canvas id="nutritionUnder5Chart"></canvas>
-      <canvas id="nutritionUnder2Chart"></canvas>
-    </div>
-  </div>
-
-  <div class="mb-6">
-    <h2 class="text-xl font-semibold mb-2">📏 Growth Monitoring Practices</h2>
-    <canvas id="growthPracticesChart"></canvas>
-  </div>
-
-  <div class="mb-6">
-    <h2 class="text-xl font-semibold mb-2">🛠️ Public Health Programs</h2>
-    <canvas id="publicHealthChart"></canvas>
-  </div>
-
-  <!-- Raw Data Table & Export -->
-  <button id="toggleTableBtn" class="bg-blue-600 text-white px-4 py-2 rounded mb-4 hover:bg-blue-700">Show Data Table</button>
-  <div id="dataTableWrapper" class="hidden">
-    <table id="dataTable" class="min-w-full border border-gray-300 text-sm mb-4"></table>
-    <div class="flex gap-2 mb-6">
-      <button id="exportExcelBtn" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Export Excel</button>
-      <button id="exportPdfBtn" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Export PDF</button>
-    </div>
+  <!-- Data Table -->
+  <div id="dataTableContainer" class="hidden bg-white p-4 rounded shadow overflow-x-auto">
+    <table id="dataTable" class="min-w-full border border-gray-300"></table>
   </div>
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbzrq5jF8l3ClBCAjg2Yj5OVp1mMw4jQrysJ45fwiWaINy8miV2Gd6vr0MYedIDWyJjhGQ/exec";
-let allData = [];
-let charts = {};
+const API_URL = "https://script.google.com/macros/s/AKfycbzrq5jF8l3ClBCAjg2Yj5OVp1mMw4jQrysJ45fwiWaINy8miV2Gd6vr0MYedIDWyJjhGQ/exec"; // <-- replace with your Apps Script URL
+let rawData = [];
 
-// Helpers
-const sumField = (data, field) => data.reduce((s,d)=>s+Number(d[field]||0),0);
-const countYes = (data, field) => data.filter(d=>d[field]==="Yes").length;
-
-// Fetch data
-async function loadData() {
-  const res = await fetch(API_URL);
-  allData = await res.json();
-  populateFacilityFilter();
-  updateDashboard(allData);
+// Fetch data from Apps Script
+async function fetchData() {
+  try {
+    const res = await fetch(API_URL);
+    rawData = await res.json();
+    if (!Array.isArray(rawData)) rawData = [];
+    renderDashboard();
+    renderTable();
+  } catch (err) {
+    console.error("Error fetching data:", err);
+  }
 }
 
-// Facility filter
-function populateFacilityFilter() {
-  const select = document.getElementById("facilityFilter");
-  const facilities = [...new Set(allData.map(d => d.healthFacility))].sort();
-  select.innerHTML = `<option value="">All Facilities</option>`;
-  facilities.forEach(f => {
-    const opt = document.createElement("option");
-    opt.value = f; opt.textContent = f;
-    select.appendChild(opt);
-  });
-
-  select.addEventListener("change", ()=>{
-    const filtered = select.value ? allData.filter(d => d.healthFacility===select.value) : allData;
-    updateDashboard(filtered);
-  });
-}
-
-// Update Dashboard
-function updateDashboard(data){
-  renderCards(data);
-  renderNutritionCharts(data);
-  renderGrowthChart(data);
-  renderPublicHealthChart(data);
-  renderTable(data);
-}
-
-// Cards
-function renderCards(data){
-  const container = document.getElementById("cardsContainer");
+// Render dashboard cards with charts
+function renderDashboard() {
+  const container = document.getElementById("dashboard");
   container.innerHTML = "";
 
-  const metrics = [
-    { title: "Children <5", value: sumField(data,"childrenUnder5") },
-    { title: "Children <2", value: sumField(data,"childrenUnder2") },
-    { title: "Children <2 GMP", value: sumField(data,"childrenUnder2GMP") }
-  ];
-
-  metrics.forEach(m=>{
+  rawData.forEach((row, idx) => {
+    // Card container
     const card = document.createElement("div");
-    card.className="bg-blue-100 p-4 rounded shadow text-center";
-    card.innerHTML=`<div class="text-xl font-bold">${m.value}</div><div>${m.title}</div>`;
+    card.className = "bg-white p-4 rounded shadow space-y-3";
+
+    // Facility info
+    const facilityInfo = document.createElement("div");
+    facilityInfo.innerHTML = `<h2 class="font-semibold text-lg">${row.healthFacility || 'Facility ' + (idx+1)}</h2>
+      <p><strong>Staff:</strong> ${row.staffName || '-'} | <strong>Title:</strong> ${row.staffTitle || '-'} | <strong>Contact:</strong> ${row.staffContact || '-'}</p>
+      <p><strong>Training:</strong> ${row.training || '-'}</p>
+      <p><strong>Children under 5:</strong> ${row.childrenUnder5 || 0}, <strong>Under 2:</strong> ${row.childrenUnder2 || 0}, <strong>Under 2 GMP:</strong> ${row.childrenUnder2GMP || 0}</p>`;
+    card.appendChild(facilityInfo);
+
+    // Nutrition chart
+    const nutritionCanvas = document.createElement("canvas");
+    nutritionCanvas.id = "chartNutrition" + idx;
+    card.appendChild(nutritionCanvas);
+
+    const labels5 = ["Underweight", "Stunted", "Wasted", "Overweight", "Obesity"];
+    const data5 = [
+      Number(row.underweight5 || 0),
+      Number(row.stunted5 || 0),
+      Number(row.wasted5 || 0),
+      Number(row.overweight5 || 0),
+      Number(row.obesity5 || 0)
+    ];
+
+    new Chart(nutritionCanvas.getContext("2d"), {
+      type: "bar",
+      data: {
+        labels: labels5,
+        datasets: [{
+          label: "Children <5",
+          data: data5,
+          backgroundColor: ["#f87171","#fb923c","#facc15","#4ade80","#22d3ee"]
+        }]
+      },
+      options: { responsive:true, plugins:{ legend:{display:true} } }
+    });
+
     container.appendChild(card);
   });
 }
 
-// Nutrition charts
-function renderNutritionCharts(data){
-  const labels=["Underweight","Stunted","Wasted","Overweight","Obesity"];
-  const under5 = labels.map(l=>sumField(data,l+"5"));
-  const under2 = labels.map(l=>sumField(data,l+"2"));
+// Render raw data table
+function renderTable() {
+  const table = document.getElementById("dataTable");
+  table.innerHTML = "";
+  if (!rawData.length) return;
 
-  const ctx5 = document.getElementById("nutritionUnder5Chart").getContext("2d");
-  if(charts.under5) charts.under5.destroy();
-  charts.under5 = new Chart(ctx5,{ type:"bar", data:{ labels, datasets:[{ label:"<5", data:under5, backgroundColor:"#3b82f6" }] }, options:{ responsive:true, plugins:{ legend:{ display:false } } } });
+  // Table header
+  const headerRow = document.createElement("tr");
+  Object.keys(rawData[0]).forEach(h => {
+    const th = document.createElement("th");
+    th.textContent = h;
+    th.className = "border px-2 py-1 bg-gray-200";
+    headerRow.appendChild(th);
+  });
+  table.appendChild(headerRow);
 
-  const ctx2 = document.getElementById("nutritionUnder2Chart").getContext("2d");
-  if(charts.under2) charts.under2.destroy();
-  charts.under2 = new Chart(ctx2,{ type:"bar", data:{ labels, datasets:[{ label:"<2", data:under2, backgroundColor:"#ef4444" }] }, options:{ responsive:true, plugins:{ legend:{ display:false } } } });
-}
-
-// Growth practices
-function renderGrowthChart(data){
-  const labels=["Routine Monitoring","Nutrition Counseling","Child Delays","Group Sessions"];
-  const counts=[countYes(data,"growthMonitoring"),countYes(data,"nutritionCounseling"),countYes(data,"childDelays"),countYes(data,"groupSession")];
-  const ctx=document.getElementById("growthPracticesChart").getContext("2d");
-  if(charts.growth) charts.growth.destroy();
-  charts.growth=new Chart(ctx,{ type:"pie", data:{ labels, datasets:[{ data:counts, backgroundColor:["#3b82f6","#f97316","#10b981","#ef4444"] }] }, options:{ responsive:true } });
-}
-
-// Public health
-function renderPublicHealthChart(data){
-  const issues=[
-    "Unhealthy diet","Skipping meals","Soft drinks & energy drinks","Mental health problems",
-    "Mental health illness","Diabetes","Cancer","Other NCDs","Not active","Smoking & vaping",
-    "Drugs","Unwanted pregnancies","Disabilities","High Screen time"
-  ];
-  const counts = issues.map(i => data.filter(d=>d.issues?.includes(i)).length);
-  const ctx = document.getElementById("publicHealthChart").getContext("2d");
-  if(charts.public) charts.public.destroy();
-  charts.public=new Chart(ctx,{ type:"bar", data:{ labels:issues, datasets:[{ label:"Count", data:counts, backgroundColor:"#8b5cf6" }] }, options:{ indexAxis:'y', responsive:true, plugins:{ legend:{ display:false } } } });
-}
-
-// Table
-function renderTable(data){
-  const wrapper=document.getElementById("dataTableWrapper");
-  const table=document.getElementById("dataTable");
-  table.innerHTML="";
-  if(!data.length) return;
-  const headers=Object.keys(data[0]);
-  const thead=document.createElement("tr");
-  headers.forEach(h=>{ const th=document.createElement("th"); th.textContent=h; th.className="border px-2 py-1 bg-gray-200"; thead.appendChild(th); });
-  table.appendChild(thead);
-
-  data.forEach(r=>{
-    const tr=document.createElement("tr");
-    Object.values(r).forEach(v=>{ const td=document.createElement("td"); td.textContent=v; td.className="border px-2 py-1"; tr.appendChild(td); });
+  // Table rows
+  rawData.forEach(row => {
+    const tr = document.createElement("tr");
+    Object.values(row).forEach(v => {
+      const td = document.createElement("td");
+      td.textContent = v;
+      td.className = "border px-2 py-1";
+      tr.appendChild(td);
+    });
     table.appendChild(tr);
   });
 }
 
-// Toggle table
-document.getElementById("toggleTableBtn").addEventListener("click",()=>{
-  const wrapper=document.getElementById("dataTableWrapper");
-  wrapper.classList.toggle("hidden");
-  document.getElementById("toggleTableBtn").textContent = wrapper.classList.contains("hidden")?"Show Data Table":"Hide Data Table";
+// Toggle table visibility
+document.getElementById("toggleTable").addEventListener("click", () => {
+  document.getElementById("dataTableContainer").classList.toggle("hidden");
 });
 
 // Export Excel
-document.getElementById("exportExcelBtn").addEventListener("click",()=>{
-  const ws=XLSX.utils.table_to_sheet(document.getElementById("dataTable"));
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,"GMP Data");
-  XLSX.writeFile(wb,"GMP_Data.xlsx");
+document.getElementById("exportExcel").addEventListener("click", () => {
+  const ws = XLSX.utils.json_to_sheet(rawData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "GMP Data");
+  XLSX.writeFile(wb, "gmp_data.xlsx");
 });
 
 // Export PDF
-document.getElementById("exportPdfBtn").addEventListener("click",()=>{
-  const wrapper=document.getElementById("dataTableWrapper");
-  html2canvas(wrapper).then(canvas=>{
-    const imgData=canvas.toDataURL("image/png");
-    const pdf=new jspdf.jsPDF({orientation:"landscape"});
-    const imgProps = pdf.getImageProperties(imgData);
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (imgProps.height*pdfWidth)/imgProps.width;
-    pdf.addImage(imgData,"PNG",0,0,pdfWidth,pdfHeight);
-    pdf.save("GMP_Data.pdf");
+document.getElementById("exportPDF").addEventListener("click", () => {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  rawData.forEach((row, i) => {
+    doc.text(`Facility ${i+1}: ${row.healthFacility || '-'}`, 10, 10 + i*10);
   });
+  doc.save("gmp_data.pdf");
 });
 
-loadData();
+// Initialize
+fetchData();
 </script>
 </body>
 </html>
