@@ -12,16 +12,16 @@
 <body class="bg-gray-100 p-6">
 
 <div class="max-w-6xl mx-auto">
-  <h1 class="text-3xl font-bold mb-6 text-center">🧒 Child Nutrition & Growth Monitoring Dashboard</h1>
+  <h1 class="text-3xl font-bold mb-6 text-center">🧒 Child Nutrition Dashboard</h1>
 
   <div class="flex justify-end mb-4 space-x-2">
-    <button id="exportExcel" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Export Excel</button>
-    <button id="exportPDF" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Export PDF</button>
-    <button id="toggleTable" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">Toggle Table</button>
+    <button id="exportExcel" class="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700">Excel</button>
+    <button id="exportPDF" class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700">PDF</button>
+    <button id="toggleTable" class="bg-gray-600 text-white px-4 py-1 rounded hover:bg-gray-700">Table</button>
   </div>
 
   <!-- Dashboard Cards -->
-  <div id="dashboard" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6"></div>
+  <div id="dashboard" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6"></div>
 
   <!-- Data Table -->
   <div id="dataTableContainer" class="hidden bg-white p-4 rounded shadow overflow-x-auto">
@@ -30,7 +30,7 @@
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbzrq5jF8l3ClBCAjg2Yj5OVp1mMw4jQrysJ45fwiWaINy8miV2Gd6vr0MYedIDWyJjhGQ/exec"; // <-- replace with your Apps Script URL
+const API_URL = "https://script.google.com/macros/s/YOUR_APP_SCRIPT_ID/exec"; // Replace with your Apps Script URL
 let rawData = [];
 
 // Fetch data from Apps Script
@@ -46,52 +46,44 @@ async function fetchData() {
   }
 }
 
-// Render dashboard cards with charts
+// Render small cards
 function renderDashboard() {
   const container = document.getElementById("dashboard");
   container.innerHTML = "";
 
   rawData.forEach((row, idx) => {
-    // Card container
     const card = document.createElement("div");
-    card.className = "bg-white p-4 rounded shadow space-y-3";
+    card.className = "bg-white p-3 rounded shadow flex flex-col items-center space-y-2";
 
-    // Facility info
-    const facilityInfo = document.createElement("div");
-    facilityInfo.innerHTML = `<h2 class="font-semibold text-lg">${row.healthFacility || 'Facility ' + (idx+1)}</h2>
-      <p><strong>Staff:</strong> ${row.staffName || '-'} | <strong>Title:</strong> ${row.staffTitle || '-'} | <strong>Contact:</strong> ${row.staffContact || '-'}</p>
-      <p><strong>Training:</strong> ${row.training || '-'}</p>
-      <p><strong>Children under 5:</strong> ${row.childrenUnder5 || 0}, <strong>Under 2:</strong> ${row.childrenUnder2 || 0}, <strong>Under 2 GMP:</strong> ${row.childrenUnder2GMP || 0}</p>`;
-    card.appendChild(facilityInfo);
+    card.innerHTML = `
+      <h2 class="font-semibold text-lg text-center">${row.healthFacility || 'Facility ' + (idx+1)}</h2>
+      <p class="text-sm">Staff: ${row.staffName || '-'}</p>
+      <p class="text-sm">Under 5: ${row.childrenUnder5 || 0}</p>
+      <p class="text-sm">Under 2: ${row.childrenUnder2 || 0}</p>
+      <canvas id="chart${idx}" class="w-full" height="100"></canvas>
+    `;
+    container.appendChild(card);
 
-    // Nutrition chart
-    const nutritionCanvas = document.createElement("canvas");
-    nutritionCanvas.id = "chartNutrition" + idx;
-    card.appendChild(nutritionCanvas);
-
-    const labels5 = ["Underweight", "Stunted", "Wasted", "Overweight", "Obesity"];
-    const data5 = [
-      Number(row.underweight5 || 0),
-      Number(row.stunted5 || 0),
-      Number(row.wasted5 || 0),
-      Number(row.overweight5 || 0),
-      Number(row.obesity5 || 0)
-    ];
-
-    new Chart(nutritionCanvas.getContext("2d"), {
-      type: "bar",
+    // Nutrition chart inside card
+    const ctx = document.getElementById("chart" + idx).getContext("2d");
+    new Chart(ctx, {
+      type: "doughnut",
       data: {
-        labels: labels5,
+        labels: ["Underweight","Stunted","Wasted","Overweight","Obesity"],
         datasets: [{
           label: "Children <5",
-          data: data5,
-          backgroundColor: ["#f87171","#fb923c","#facc15","#4ade80","#22d3ee"]
+          data: [
+            Number(row.underweight5||0),
+            Number(row.stunted5||0),
+            Number(row.wasted5||0),
+            Number(row.overweight5||0),
+            Number(row.obesity5||0)
+          ],
+          backgroundColor:["#f87171","#fb923c","#facc15","#4ade80","#22d3ee"]
         }]
       },
-      options: { responsive:true, plugins:{ legend:{display:true} } }
+      options: { responsive:true, plugins:{ legend:{position:'bottom'} } }
     });
-
-    container.appendChild(card);
   });
 }
 
@@ -101,23 +93,21 @@ function renderTable() {
   table.innerHTML = "";
   if (!rawData.length) return;
 
-  // Table header
   const headerRow = document.createElement("tr");
   Object.keys(rawData[0]).forEach(h => {
     const th = document.createElement("th");
     th.textContent = h;
-    th.className = "border px-2 py-1 bg-gray-200";
+    th.className = "border px-2 py-1 bg-gray-200 text-xs";
     headerRow.appendChild(th);
   });
   table.appendChild(headerRow);
 
-  // Table rows
   rawData.forEach(row => {
     const tr = document.createElement("tr");
     Object.values(row).forEach(v => {
       const td = document.createElement("td");
       td.textContent = v;
-      td.className = "border px-2 py-1";
+      td.className = "border px-2 py-1 text-xs";
       tr.appendChild(td);
     });
     table.appendChild(tr);
